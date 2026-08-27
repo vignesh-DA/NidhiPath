@@ -33,7 +33,7 @@ class WelfareSchemeMatch(BaseModel):
     """A matched welfare scheme with summary info."""
     scheme_id: str
     scheme_name: str
-    issuing_state: str
+    issuing_state: str = ""  # null in JSON → empty string
     benefits: str = ""
     eligibility_summary: str = ""
     match_confidence: str = "approximate"  # Always approximate for welfare schemes
@@ -105,52 +105,72 @@ def _matches_state(scheme: dict, user_state: Optional[str]) -> bool:
     return issuing_state == user_state.strip().lower()
 
 
+def _check_income_criterion(criterion: dict, user_income: float) -> bool:
+    """Check a single income criterion dict."""
+    operator = criterion.get("operator", "less_than")
+    amount = criterion.get("amount")
+
+    if amount is None:
+        return True
+
+    amount = float(amount)
+
+    if operator in ("less_than", "lt", "<"):
+        return user_income < amount
+    elif operator in ("less_than_or_equal", "lte", "<="):
+        return user_income <= amount
+    elif operator in ("greater_than", "gt", ">"):
+        return user_income > amount
+    elif operator in ("greater_than_or_equal", "gte", ">="):
+        return user_income >= amount
+    elif operator in ("equal", "eq", "=="):
+        return user_income == amount
+    elif operator in ("between",):
+        max_amount = criterion.get("max_amount", float("inf"))
+        return amount <= user_income <= float(max_amount)
+    else:
+        return True  # Unknown operator — include
+
+
 def _matches_income(scheme: dict, user_income: float) -> bool:
     """
-    Check income criteria. Handles the {operator, amount} structure.
+    Check income criteria.
+    Real JSON has income_criteria as a LIST of criterion dicts.
+    Also handles legacy dict/scalar/string formats.
     If no income criteria, assume the scheme is open to all income levels.
     """
     income_criteria = scheme.get("income_criteria")
 
-    if income_criteria is None:
+    if not income_criteria:  # None or empty list
         return True
 
-    # Handle dict format: {"operator": "less_than", "amount": 250000}
+    # Real format: list of criterion dicts — user must satisfy ANY one
+    if isinstance(income_criteria, list):
+        if not income_criteria:
+            return True
+        # Filter to annual_family_income type only; others (e.g. assets) are irrelevant here
+        income_items = [
+            c for c in income_criteria
+            if isinstance(c, dict) and c.get("type", "") in (
+                "annual_family_income", "annual_income", ""
+            )
+        ] or income_criteria  # fallback: use all if none typed
+        # User passes if they satisfy at least one income criterion
+        return any(
+            _check_income_criterion(c, user_income)
+            for c in income_items
+            if isinstance(c, dict)
+        )
+
+    # Legacy: single dict
     if isinstance(income_criteria, dict):
-        operator = income_criteria.get("operator", "less_than")
-        amount = income_criteria.get("amount")
+        return _check_income_criterion(income_criteria, user_income)
 
-        if amount is None:
-            return True
-
-        amount = float(amount)
-
-        if operator in ("less_than", "lt", "<"):
-            return user_income < amount
-        elif operator in ("less_than_or_equal", "lte", "<="):
-            return user_income <= amount
-        elif operator in ("greater_than", "gt", ">"):
-            return user_income > amount
-        elif operator in ("greater_than_or_equal", "gte", ">="):
-            return user_income >= amount
-        elif operator in ("equal", "eq", "=="):
-            return user_income == amount
-        elif operator in ("between",):
-            max_amount = income_criteria.get("max_amount", float("inf"))
-            return amount <= user_income <= float(max_amount)
-        else:
-            # Unknown operator — be conservative, include the scheme
-            return True
-
-    # Handle simple numeric format
+    # Legacy: simple numeric
     if isinstance(income_criteria, (int, float)):
         return user_income <= float(income_criteria)
 
-    # Handle string format (e.g., "Below 2.5 Lakh") — keyword extraction
-    if isinstance(income_criteria, str):
-        # Can't reliably parse — include and let user verify
-        return True
-
+    # Legacy: unparseable string — include and let user verify
     return True
 
 
@@ -175,8 +195,8 @@ def _matches_target_scope(scheme: dict, user_caste_scope: Optional[list[str]] = 
         return True
 
     # Check overlap
-    target_lower = {t.strip().lower() for t in target_scope}
-    user_lower = {c.strip().lower() for c in user_caste_scope}
+    target_lower = {t.strip().lower() for t in target_scope if t}
+    user_lower = {c.strip().lower() for c in user_caste_scope if c}
 
     # Common aliases
     aliases = {
@@ -212,8 +232,14 @@ def _keyword_match_education(scheme: dict, education_keywords: Optional[list[str
     if education_keywords is None:
         return True
 
-    criteria_text = scheme.get("education_criteria", "")
-    if not criteria_text:
+    criteria_raw = scheme.get("education_criteria", "")
+    # Real JSON: list of strings — join them for keyword search
+    if isinstance(criteria_raw, list):
+        criteria_text = " ".join(str(c) for c in criteria_raw)
+    else:
+        criteria_text = str(criteria_raw or "")
+
+    if not criteria_text.strip():
         return True  # No education restriction
 
     criteria_lower = criteria_text.lower()
@@ -281,12 +307,32 @@ def filter_welfare_schemes(
         if education_keywords:
             reasons.append("Education criteria keyword match (approximate)")
 
+        # scheme_id may be int — coerce to str
+        raw_id = scheme.get("scheme_id") or scheme.get("canonical_scheme_id") or scheme.get("id", "")
+        scheme_id_str = str(raw_id)
+
+        # benefits may be a list of dicts — flatten to a summary string
+        raw_benefits = scheme.get("benefits", "")
+        if isinstance(raw_benefits, list):
+            benefits_str = "; ".join(
+                b.get("description", "") for b in raw_benefits if isinstance(b, dict)
+            )[:500]
+        else:
+            benefits_str = str(raw_benefits or "")[:500]
+
+        # eligibility may be a list of strings
+        raw_eligibility = scheme.get("eligibility", scheme.get("education_criteria", ""))
+        if isinstance(raw_eligibility, list):
+            eligibility_str = " ".join(str(e) for e in raw_eligibility)[:500]
+        else:
+            eligibility_str = str(raw_eligibility or "")[:500]
+
         matched.append(WelfareSchemeMatch(
-            scheme_id=scheme.get("scheme_id", scheme.get("id", "")),
-            scheme_name=scheme.get("scheme_name", scheme.get("name", "Unknown")),
-            issuing_state=scheme.get("issuing_state", "Unknown"),
-            benefits=str(scheme.get("benefits", ""))[:500],  # Truncate for summary
-            eligibility_summary=str(scheme.get("eligibility", ""))[:500],
+            scheme_id=scheme_id_str,
+            scheme_name=scheme.get("scheme_name") or scheme.get("name") or "Unknown",
+            issuing_state=scheme.get("issuing_state") or "Central",
+            benefits=benefits_str,
+            eligibility_summary=eligibility_str,
             match_reasons=reasons,
         ))
 
