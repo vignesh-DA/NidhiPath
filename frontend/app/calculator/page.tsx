@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { calculateEmi } from "@/lib/apiClient";
 import type { MatchedScheme, EmiBreakdown } from "@/lib/types";
 
@@ -28,7 +29,7 @@ export default function CalculatorPage() {
 
     // Set default requested amount to scheme's max or a reasonable default
     const maxLoan = parsed.max_loan_amount || parsed.project_cost_max * (parsed.project_cost_coverage_pct / 100);
-    setRequestedAmount(Math.min(maxLoan, parsed.project_cost_max));
+    setRequestedAmount(Math.min(maxLoan, parsed.project_cost_max || 100000));
     setRequestedMonths(parsed.tenure_years ? parsed.tenure_years * 12 : 36);
   }, [router]);
 
@@ -66,7 +67,10 @@ export default function CalculatorPage() {
     }
   }, [scheme, requestedAmount, requestedMonths, handleCalculate]);
 
-  const formatCurrency = (n: number) => `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  const formatCurrency = (n: number | undefined | null) => {
+    if (n == null) return "₹0";
+    return `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  };
 
   if (!scheme) return null;
 
@@ -74,211 +78,259 @@ export default function CalculatorPage() {
   const maxMonths = scheme.tenure_years ? scheme.tenure_years * 12 : 120;
 
   return (
-    <div className="page-container pt-8 pb-16 max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 animate-fade-in">
-        <button
-          onClick={() => router.push("/recommendation")}
-          className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors mb-6 cursor-pointer"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          Back to recommendations
-        </button>
+    <div className="w-full bg-[#F8FAF8] min-h-[calc(100vh-80px)] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Navigation & Header */}
+        <div className="mb-6">
+          <Link
+            href="/recommendation"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B7280] hover:text-[#16A34A] transition-colors mb-3"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            <span>Back to Recommendations</span>
+          </Link>
 
-        <h1 className="section-title">EMI Calculator</h1>
-        <p className="text-sm text-[var(--color-accent)] font-medium">{scheme.scheme_name}</p>
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          {scheme.interest_rate_beneficiary}% p.a. • Coverage: {scheme.project_cost_coverage_pct}%
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-[1fr,1.2fr] gap-8">
-        {/* Sliders */}
-        <div className="space-y-6 animate-slide-up">
-          {/* Loan Amount */}
-          <div>
-            <label className="label">
-              Loan Amount: <span className="text-[var(--color-foreground)] font-semibold">{formatCurrency(requestedAmount)}</span>
-            </label>
-            <input
-              type="range"
-              min={10000}
-              max={maxLoan}
-              step={5000}
-              value={requestedAmount}
-              onChange={(e) => setRequestedAmount(Number(e.target.value))}
-              className="w-full h-2 rounded-full bg-[var(--color-surface-3)] appearance-none cursor-pointer accent-[var(--color-accent)]"
-              id="slider-amount"
-            />
-            <div className="flex justify-between text-xs text-[var(--color-text-muted)] mt-1">
-              <span>₹10,000</span>
-              <span>{formatCurrency(maxLoan)}</span>
-            </div>
-          </div>
-
-          {/* Tenure */}
-          <div>
-            <label className="label">
-              Tenure: <span className="text-[var(--color-foreground)] font-semibold">{requestedMonths} months ({(requestedMonths / 12).toFixed(1)} yrs)</span>
-            </label>
-            <input
-              type="range"
-              min={6}
-              max={maxMonths}
-              step={6}
-              value={requestedMonths}
-              onChange={(e) => setRequestedMonths(Number(e.target.value))}
-              className="w-full h-2 rounded-full bg-[var(--color-surface-3)] appearance-none cursor-pointer accent-[var(--color-accent)]"
-              id="slider-tenure"
-            />
-            <div className="flex justify-between text-xs text-[var(--color-text-muted)] mt-1">
-              <span>6 months</span>
-              <span>{maxMonths} months</span>
-            </div>
-          </div>
-
-          {/* Moratorium Info */}
-          {scheme.moratorium_months && scheme.moratorium_months > 0 && (
-            <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg p-4">
-              <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-1">Moratorium Period</p>
-              <p className="text-sm text-[var(--color-foreground)]">{scheme.moratorium_months} months</p>
-              <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                EMI starts from month {scheme.moratorium_months + 1}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0F1F0F] tracking-tight">
+                Financial EMI Calculator
+              </h1>
+              <p className="text-sm text-[#6B7280] mt-0.5">
+                Scheme-enforced calculations for <strong className="text-[#16A34A]">{scheme.scheme_name}</strong>
               </p>
             </div>
-          )}
+
+            <div className="inline-flex items-center gap-2 bg-white border border-[#E5EBE5] rounded-xl px-3.5 py-2 shadow-xs">
+              <span className="text-xs text-[#6B7280]">Fixed Scheme Rate:</span>
+              <span className="text-sm font-bold text-[#16A34A]">{scheme.interest_rate_beneficiary}% p.a.</span>
+            </div>
+          </div>
         </div>
 
-        {/* Results */}
-        <div className="animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          {error && (
-            <div className="bg-[var(--color-destructive)]/10 border border-[var(--color-destructive)]/30 rounded-lg p-3 text-sm text-[var(--color-destructive)] mb-4">
-              {error}
+        {/* 2-Column Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Column: Sliders & Scheme Controls (lg:col-span-7) */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-white border border-[#E5EBE5] rounded-3xl p-6 sm:p-7 shadow-xs space-y-6">
+              
+              {/* Slider 1: Loan Amount */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-bold text-[#111827]">
+                    Requested Loan Amount (P)
+                  </label>
+                  <span className="text-lg font-extrabold text-[#16A34A] bg-[#DCFCE7] px-3 py-1 rounded-xl">
+                    {formatCurrency(requestedAmount)}
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min={10000}
+                  max={maxLoan}
+                  step={5000}
+                  value={requestedAmount}
+                  onChange={(e) => setRequestedAmount(Number(e.target.value))}
+                  className="w-full h-2.5 rounded-full bg-[#E5E7EB] appearance-none cursor-pointer accent-[#16A34A]"
+                  id="slider-amount"
+                />
+
+                <div className="flex justify-between text-xs text-[#6B7280] mt-2 font-medium">
+                  <span>Min: ₹10,000</span>
+                  <span>Scheme Cap: {formatCurrency(maxLoan)}</span>
+                </div>
+              </div>
+
+              {/* Slider 2: Repayment Tenure */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-bold text-[#111827]">
+                    Repayment Tenure (n)
+                  </label>
+                  <span className="text-lg font-extrabold text-[#111827] bg-[#F3F4F6] px-3 py-1 rounded-xl">
+                    {requestedMonths} Months <span className="text-xs font-normal text-[#6B7280]">({(requestedMonths / 12).toFixed(1)} yrs)</span>
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min={6}
+                  max={maxMonths}
+                  step={6}
+                  value={requestedMonths}
+                  onChange={(e) => setRequestedMonths(Number(e.target.value))}
+                  className="w-full h-2.5 rounded-full bg-[#E5E7EB] appearance-none cursor-pointer accent-[#16A34A]"
+                  id="slider-tenure"
+                />
+
+                <div className="flex justify-between text-xs text-[#6B7280] mt-2 font-medium">
+                  <span>Min: 6 Months</span>
+                  <span>Scheme Max: {maxMonths} Months</span>
+                </div>
+              </div>
+
+              {/* Moratorium Feature Callout */}
+              {scheme.moratorium_months && scheme.moratorium_months > 0 ? (
+                <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl p-4 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#DCFCE7] text-[#16A34A] flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#047857] uppercase tracking-wider">
+                      Moratorium Period: {scheme.moratorium_months} Months
+                    </h4>
+                    <p className="text-xs text-[#374151] mt-0.5 leading-relaxed">
+                      First EMI payment starts at <strong>Month {scheme.moratorium_months + 1}</strong>. Interest does not accrue during this period per documented standard.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Scheme Limits Information */}
+              <div className="pt-2 border-t border-[#F3F4F6] text-xs text-[#6B7280] space-y-1">
+                <p>• Cost Coverage: <strong>{scheme.project_cost_coverage_pct}%</strong> of project cost</p>
+                <p>• Interest Rate: <strong>{scheme.interest_rate_beneficiary}% p.a.</strong> (NSFDC concessional rate)</p>
+              </div>
+
             </div>
-          )}
+          </div>
 
-          {result && (
-            <div className="space-y-4">
-              {/* EMI Hero */}
-              <div className="glass-card p-6 text-center glow-border">
-                <p className="text-sm text-[var(--color-text-muted)] mb-1">Monthly EMI</p>
-                <p className="text-4xl font-bold text-[var(--color-accent)] glow-text">
-                  {formatCurrency(result.emi_amount)}
-                </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-2">
-                  Starting from month {result.first_emi_month}
-                </p>
+          {/* Right Column: EMI Calculation Result Card (lg:col-span-5) */}
+          <div className="lg:col-span-5 space-y-5">
+            {error && (
+              <div className="p-4 rounded-2xl bg-[#FEF2F2] border border-[#FECACA] text-xs text-[#991B1B]">
+                {error}
               </div>
+            )}
 
-              {/* Breakdown */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="glass-card p-4">
-                  <p className="text-xs text-[var(--color-text-muted)]">Effective Loan</p>
-                  <p className="text-lg font-semibold">{formatCurrency(result.effective_loan_amount)}</p>
+            {result && (
+              <div className="bg-white border border-[#E5EBE5] rounded-3xl p-6 sm:p-7 shadow-sm space-y-5">
+                
+                {/* Hero EMI Display */}
+                <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-2xl p-5 text-center shadow-xs">
+                  <span className="text-xs font-bold text-[#047857] uppercase tracking-wider block">
+                    Calculated Monthly EMI
+                  </span>
+                  <span className="text-4xl sm:text-5xl font-extrabold text-[#16A34A] tracking-tight block my-2">
+                    {formatCurrency(result.emi_amount)}
+                  </span>
+                  <span className="text-xs text-[#6B7280]">
+                    Payment starts at Month {result.first_emi_month}
+                  </span>
                 </div>
-                <div className="glass-card p-4">
-                  <p className="text-xs text-[var(--color-text-muted)]">Total Interest</p>
-                  <p className="text-lg font-semibold text-[var(--color-warning)]">{formatCurrency(result.total_interest)}</p>
-                </div>
-                <div className="glass-card p-4">
-                  <p className="text-xs text-[var(--color-text-muted)]">Total Payment</p>
-                  <p className="text-lg font-semibold">{formatCurrency(result.total_payment)}</p>
-                </div>
-                <div className="glass-card p-4">
-                  <p className="text-xs text-[var(--color-text-muted)]">Total Duration</p>
-                  <p className="text-lg font-semibold">{result.total_duration_months} months</p>
-                </div>
-              </div>
 
-              {/* Caps Applied */}
-              {result.caps_applied.length > 0 && (
-                <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg p-4">
-                  <p className="text-xs font-medium text-[var(--color-warning)] mb-2">⚠ Caps Applied</p>
-                  {result.caps_applied.map((cap, i) => (
-                    <p key={i} className="text-xs text-[var(--color-text-secondary)] mb-1">• {cap}</p>
-                  ))}
+                {/* Breakdown Tiles */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#F8FAF8] border border-[#E5EBE5] rounded-2xl p-3.5">
+                    <span className="text-[11px] font-semibold text-[#6B7280] block">Effective Principal (P)</span>
+                    <span className="text-base font-bold text-[#111827] mt-0.5 block">
+                      {formatCurrency(result.effective_loan_amount)}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#F8FAF8] border border-[#E5EBE5] rounded-2xl p-3.5">
+                    <span className="text-[11px] font-semibold text-[#6B7280] block">Total Interest</span>
+                    <span className="text-base font-bold text-[#D97706] mt-0.5 block">
+                      {formatCurrency(result.total_interest)}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#F8FAF8] border border-[#E5EBE5] rounded-2xl p-3.5">
+                    <span className="text-[11px] font-semibold text-[#6B7280] block">Total Repayment</span>
+                    <span className="text-base font-bold text-[#111827] mt-0.5 block">
+                      {formatCurrency(result.total_payment)}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#F8FAF8] border border-[#E5EBE5] rounded-2xl p-3.5">
+                    <span className="text-[11px] font-semibold text-[#6B7280] block">Total Duration</span>
+                    <span className="text-base font-bold text-[#111827] mt-0.5 block">
+                      {result.total_duration_months} Months
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              {/* Assumption */}
-              <div className="bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg p-3">
-                <p className="text-xs text-[var(--color-text-muted)]">
-                  ⓘ {result.assumption_note}
-                </p>
-              </div>
+                {/* Caps Warning if any */}
+                {result.caps_applied.length > 0 && (
+                  <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-xl p-3 text-xs text-[#92400E]">
+                    <span className="font-bold block mb-1">Notice on Scheme Limits:</span>
+                    {result.caps_applied.map((cap, i) => (
+                      <p key={i}>• {cap}</p>
+                    ))}
+                  </div>
+                )}
 
-              {/* Schedule toggle */}
-              <button
-                onClick={() => { setShowSchedule(!showSchedule); }}
-                className="btn-secondary w-full justify-center text-sm"
-                id="btn-toggle-schedule"
-              >
-                {showSchedule ? "Hide" : "Show"} Amortization Schedule
-              </button>
-
-              {/* Schedule Table */}
-              {showSchedule && result.schedule.length > 0 && (
-                <div className="overflow-x-auto glass-card p-4 max-h-64 overflow-y-auto">
-                  <table className="w-full text-xs">
-                    <thead className="sticky top-0 bg-[var(--color-card)]">
-                      <tr className="text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
-                        <th className="py-2 text-left">Month</th>
-                        <th className="py-2 text-left">Type</th>
-                        <th className="py-2 text-right">EMI</th>
-                        <th className="py-2 text-right">Principal</th>
-                        <th className="py-2 text-right">Interest</th>
-                        <th className="py-2 text-right">Balance</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {result.schedule.map((row) => (
-                        <tr key={row.month} className="border-b border-[var(--color-border)]/30 text-[var(--color-text-secondary)]">
-                          <td className="py-1.5">{row.month}</td>
-                          <td className="py-1.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[10px] ${
-                              row.type === "moratorium"
-                                ? "bg-[var(--color-warning)]/10 text-[var(--color-warning)]"
-                                : "bg-[var(--color-accent)]/10 text-[var(--color-accent)]"
-                            }`}>
-                              {row.type}
-                            </span>
-                          </td>
-                          <td className="py-1.5 text-right">{formatCurrency(row.emi)}</td>
-                          <td className="py-1.5 text-right">{formatCurrency(row.principal)}</td>
-                          <td className="py-1.5 text-right">{formatCurrency(row.interest)}</td>
-                          <td className="py-1.5 text-right font-medium">{formatCurrency(row.balance)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-3 pt-2">
+                {/* Action: Next step Locator */}
                 <button
                   onClick={() => router.push("/locator")}
-                  className="btn-primary flex-1 justify-center"
+                  className="w-full py-3.5 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-sm font-bold shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                   id="btn-find-partners"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
                   </svg>
-                  Find Partners
+                  <span>Find Authorized Partners for this Scheme</span>
                 </button>
-              </div>
-            </div>
-          )}
 
-          {loading && !result && (
-            <div className="glass-card p-8 text-center">
-              <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-[var(--color-accent)] border-t-transparent animate-spin" />
-              <p className="text-sm text-[var(--color-text-secondary)]">Calculating...</p>
-            </div>
-          )}
+                {/* Amortization Schedule Toggle */}
+                <button
+                  onClick={() => setShowSchedule(!showSchedule)}
+                  className="w-full py-2 text-xs font-bold text-[#6B7280] hover:text-[#111827] transition-colors"
+                  id="btn-toggle-schedule"
+                >
+                  {showSchedule ? "▲ Hide Monthly Schedule" : "▼ Show Month-by-Month Schedule"}
+                </button>
+
+              </div>
+            )}
+
+            {/* Schedule View */}
+            {showSchedule && result && result.schedule.length > 0 && (
+              <div className="bg-white border border-[#E5EBE5] rounded-3xl p-4 shadow-sm max-h-72 overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-white border-b border-[#E5EBE5]">
+                    <tr className="text-[#6B7280] text-left">
+                      <th className="py-2">Mth</th>
+                      <th className="py-2">Type</th>
+                      <th className="py-2 text-right">EMI</th>
+                      <th className="py-2 text-right">Interest</th>
+                      <th className="py-2 text-right">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F3F4F6]">
+                    {result.schedule.map((row) => (
+                      <tr key={row.month} className="text-[#374151]">
+                        <td className="py-2 font-medium">{row.month}</td>
+                        <td className="py-2">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            row.type === "moratorium" ? "bg-[#FEF3C7] text-[#92400E]" : "bg-[#DCFCE7] text-[#16A34A]"
+                          }`}>
+                            {row.type}
+                          </span>
+                        </td>
+                        <td className="py-2 text-right font-semibold">{formatCurrency(row.emi)}</td>
+                        <td className="py-2 text-right text-[#D97706]">{formatCurrency(row.interest)}</td>
+                        <td className="py-2 text-right font-medium">{formatCurrency(row.balance)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+          </div>
+
         </div>
+
       </div>
     </div>
   );

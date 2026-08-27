@@ -142,6 +142,8 @@ export interface Partner {
   state: string;
   contact?: string;
   address?: string;
+  address_raw?: string;
+  pincode?: string;
   health?: PartnerHealth;
 }
 
