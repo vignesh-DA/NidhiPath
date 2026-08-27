@@ -1,0 +1,738 @@
+[
+  {
+    "partner_id": "NBFCMFI_01",
+    "partner_name": "Anik Financial Services Private Limited",
+    "partner_type": "NBFC-MFI",
+    "state": "",
+    "address_raw": "Regd.Office: ‘Sahyadri Building” Behind Amitesh Hotel, Ambajogai Roa, Sai Naka, Latur – 413 512",
+    "pincode": "413512"
+  },
+  {
+    "partner_id": "NBFCMFI_03",
+    "partner_name": "ASA International Microfinance Ltd",
+    "partner_type": "NBFC-MFI",
+    "state": "",
+    "address_raw": "Victoria Park, 4th Floor, GN-37/2, Sector-V, Salt Lake City, Kolkata – 700 091, West Bengal.",
+    "pincode": "700091"
+  },
+  {
+    "partner_id": "NBFCMFI_05",
+    "partner_name": "Satin Creditcare Network Ltdl",
+    "partner_type": "NBFC-MFI",
+    "state": "",
+    "address_raw": "Gurgaon Plot No.492, Udyog Vihar, Phase-III, Gurugram, Haryana – 122 016.",
+    "pincode": "122016"
+  },
+  {
+    "partner_id": "NBFCMFI_07",
+    "partner_name": "Vector Finance PVT LTD",
+    "partner_type": "NBFC-MFI",
+    "state": "",
+    "address_raw": "RO-K7/110, Ground Floor, Klinga Vihar, Khandagiri, Bhubaneswar ODISHA-751029",
+    "pincode": "751029"
+  },
+  {
+    "partner_id": "NBFCMFI_02",
+    "partner_name": "Grameen Development & Finance",
+    "partner_type": "NBFC-MFI",
+    "state": "",
+    "address_raw": "Private Limited, Dubjent, Kulshi Road, Chhaygaon, Kamrup, Assam Pin – 781 124. Kolkata 4 Midland Microfin Ltd., Ludhiana The Axis, Plot No.1, R.B.Badri Dass Colony, BMC Chowk, G.T.Road, Jalandhar – 144 001, Punjab.",
+    "pincode": "781124"
+  },
+  {
+    "partner_id": "NBFCMFI_06",
+    "partner_name": "Pahal Financial Services Pvt. Ltd",
+    "partner_type": "NBFC-MFI",
+    "state": "",
+    "address_raw": "Ahmedabad 7th Floor, Binori B Square-2, Opp. Hathising Ni Vadi, Ambli-Iscon Road, Ahmedabad – 380 054, Gujarat P.S.",
+    "pincode": "380054"
+  },
+  {
+    "partner_id": "RRB_01",
+    "partner_name": "Bihar Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Shri Vishnu Commercial Complex, NH-30, New Bypass, Near Bp Highway Services Petrol Pump, Asochak, Patna - 800016",
+    "pincode": "800016"
+  },
+  {
+    "partner_id": "RRB_03",
+    "partner_name": "Jharkhand Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Zila Parishad Market Complex, 3rd Floor, Kutchery Road, Ranchi- 834001, Jharkhand.",
+    "pincode": "834001"
+  },
+  {
+    "partner_id": "RRB_05",
+    "partner_name": "Gujarat Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Head Office, Sky Line Building, 2nd Floor, Near Shital Guest House, Bharuch - 392001, Gujarat.",
+    "pincode": "392001"
+  },
+  {
+    "partner_id": "RRB_07",
+    "partner_name": "Rajasthan Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Tulsi Tower, 9th B Road Sardarpura, Jodhpur – 342003 (Rajasthan)",
+    "pincode": "342003"
+  },
+  {
+    "partner_id": "RRB_09",
+    "partner_name": "Kerala Grameena Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "PB No.10, KGpB Towers, AK Road, Uphill, Malappuram,Kerala – 676505.",
+    "pincode": "676505"
+  },
+  {
+    "partner_id": "RRB_11",
+    "partner_name": "Tripura Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "H.O. Airport Road, PO Abhaynagar, Agartala, Tripura (W) Pin – 799 005.",
+    "pincode": "799005"
+  },
+  {
+    "partner_id": "RRB_13",
+    "partner_name": "Assam Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "HO, G.S. Road, Bhangagarh, Guwahati- 781 005.(Assam)",
+    "pincode": "781005"
+  },
+  {
+    "partner_id": "RRB_15",
+    "partner_name": "Punjab Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "HO Jalandhar Road, Kapurthala – 144 601. (Punjab)",
+    "pincode": "144601"
+  },
+  {
+    "partner_id": "RRB_17",
+    "partner_name": "Madhaya Pradesh Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "C21, Business Park, C21 Square opposite Hotel Radisson Blue, MR-10 Indore- 452010, Madhaya Pradesh",
+    "pincode": "452010"
+  },
+  {
+    "partner_id": "RRB_19",
+    "partner_name": "Puducherry Grama Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "No.441, Mahatma Gandhi Road, Muthialpet, Puducherry – 605 003",
+    "pincode": "605003"
+  },
+  {
+    "partner_id": "RRB_21",
+    "partner_name": "Chhattisgarh Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Corporate Office Raipur, Plot No.-47, Sector-24, Atal Nagar, Nava Raipur-492013",
+    "pincode": "492013"
+  },
+  {
+    "partner_id": "RRB_23",
+    "partner_name": "Meghalaya Rural Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "",
+    "pincode": ""
+  },
+  {
+    "partner_id": "RRB_02",
+    "partner_name": "Maharashtra Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Plot No.35, Jeewan Shri Town Centre, CIDCO, Aurangabad, Maharashtra – 431 003.",
+    "pincode": "431003"
+  },
+  {
+    "partner_id": "RRB_04",
+    "partner_name": "Haryana Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Near Bajrang Bhawan, Delhi Road, Rohtak, Haryana –124 001",
+    "pincode": "124001"
+  },
+  {
+    "partner_id": "RRB_06",
+    "partner_name": "Telangana Grameena Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "2nd H.No.2-1-520, Floor, Vijaya Sri Sai Celestia, Street No.9, Shankermut Road, Nallakunta, Hyderabad, Telangana – 500044.",
+    "pincode": "500044"
+  },
+  {
+    "partner_id": "RRB_08",
+    "partner_name": "Uttar Pradesh Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "2nd & 3rd Floor, NBCC Commercial Complex, Vardan Khand, Gomti Nagar Extension, Lucknow–229001(Uttar Pradesh)",
+    "pincode": "229001"
+  },
+  {
+    "partner_id": "RRB_10",
+    "partner_name": "Uttarakhand Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "18-New Road, Dehradun, Uttarakhand.",
+    "pincode": ""
+  },
+  {
+    "partner_id": "RRB_12",
+    "partner_name": "Karnataka Grameena Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Head Office, CA 20, Vijayanagar IInd Stage, Musure – 570017 (Karnataka)",
+    "pincode": "570017"
+  },
+  {
+    "partner_id": "RRB_14",
+    "partner_name": "Andhra Pradesh Grameena Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "4th Floor, Raghu Mansion, 4-1, Broadipet, Guntur -522 002 (Andhra Pradesh)",
+    "pincode": "522002"
+  },
+  {
+    "partner_id": "RRB_16",
+    "partner_name": "Tamil Nadu Grama Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "6, Yercaud Road, Hasthasmpatti, Salem – 636007 (Tamil Nadu)",
+    "pincode": "636007"
+  },
+  {
+    "partner_id": "RRB_18",
+    "partner_name": "Himachal Pradesh Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Jail Road (Panjethi), PO – Talyahar Mandi 175001 (Himachal Pradesh)",
+    "pincode": "175001"
+  },
+  {
+    "partner_id": "RRB_20",
+    "partner_name": "West Bengal Gramin Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Natabar Paul Road, Chatterjee Para More, Tikiapara, Howrah – 711101 (WB)",
+    "pincode": "711101"
+  },
+  {
+    "partner_id": "RRB_22",
+    "partner_name": "Manipur Rural Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Keishampat, Keisham Leikai, Imphal, Manipur 795001",
+    "pincode": "795001"
+  },
+  {
+    "partner_id": "RRB_24",
+    "partner_name": "J&K Grameen Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "",
+    "pincode": ""
+  },
+  {
+    "partner_id": "RRB_25",
+    "partner_name": "Odisha Grameen Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Bhubaneswar. 7R25-H75, Jagamara, Sunderpada Road, Gandamuda, Pokhhariput, Bhubaneshwar -751030,Odisha",
+    "pincode": "751030"
+  },
+  {
+    "partner_id": "RRB_26",
+    "partner_name": "Mizoram Rural Bank",
+    "partner_type": "RRB",
+    "state": "",
+    "address_raw": "Mizoram MINECO, Khatla Aizawl - 796001.",
+    "pincode": "796001"
+  },
+  {
+    "partner_id": "PSB_01",
+    "partner_name": "Indian Overseas Bank",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Central Office, 763, Anna Salai, Chennai, Tamil Nadu – 600 002.",
+    "pincode": "600002"
+  },
+  {
+    "partner_id": "PSB_03",
+    "partner_name": "Canara Bank",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Head Office, 112, J.C. Road, Bengaluru – 560 002.",
+    "pincode": "560002"
+  },
+  {
+    "partner_id": "PSB_05",
+    "partner_name": "Punjab & Sind Bank",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Priority Sector Advance Department",
+    "pincode": ""
+  },
+  {
+    "partner_id": "PSB_05",
+    "partner_name": "th Floor",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "21 Rajendra Place, New Delhi – 110 008",
+    "pincode": "110008"
+  },
+  {
+    "partner_id": "PSB_07",
+    "partner_name": "Indian Bank Corporate Office",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "No.254-260, Avvai Shanmungam Salai, Mutt Road, Royapetta, Chennai – 600 014",
+    "pincode": "600014"
+  },
+  {
+    "partner_id": "PSB_09",
+    "partner_name": "Bank of India",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Bandra Kurla Complex, Bandra (East), Mumbai- 400051",
+    "pincode": "400051"
+  },
+  {
+    "partner_id": "PSB_11",
+    "partner_name": "UCO Bank",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Kolkata No 3&4, DD Block, Sector-1, Bidhannagar, Kolkata, West Bengal-700064",
+    "pincode": "700064"
+  },
+  {
+    "partner_id": "PSB_02",
+    "partner_name": "Bank of Baroda",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Baroda Bhavan",
+    "pincode": ""
+  },
+  {
+    "partner_id": "PSB_07",
+    "partner_name": "th Floor",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "R.C. Dutt Road, Vadodara – 390 007 (Gujarat)",
+    "pincode": "390007"
+  },
+  {
+    "partner_id": "PSB_04",
+    "partner_name": "Punjab National Bank",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Plot No.-4, Sector 10, Dwarka, New Delhi – 110 075",
+    "pincode": "110075"
+  },
+  {
+    "partner_id": "PSB_06",
+    "partner_name": "Union Bank of India",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Rural & Agri Business Department, Central Office Union Bank Bhavan Marg,Nariman Point, Mumbai – 400",
+    "pincode": ""
+  },
+  {
+    "partner_id": "PSB_08",
+    "partner_name": "Bank of Maharashtra",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Gowdi Head office ‘Lok mangal’ 1501, Shivajinagar, Pune-411005 Maharashtra",
+    "pincode": "411005"
+  },
+  {
+    "partner_id": "PSB_10",
+    "partner_name": "Central bank Of India",
+    "partner_type": "PSB",
+    "state": "",
+    "address_raw": "Mumbai Chandermukhi Bldg., Nariman Point, Mumbai – 400 021",
+    "pincode": "400021"
+  },
+  {
+    "partner_id": "CooperativeSociety_01",
+    "partner_name": "Streenidhi",
+    "partner_type": "Cooperative Society",
+    "state": "",
+    "address_raw": "Telangana , 401 & 402 , Floor My Home Sarovar Plaza, Secretariat Road Ambedkar Colony, Saifabad, Hyderabad, Telangana 500004",
+    "pincode": "500004"
+  },
+  {
+    "partner_id": "CooperativeBank_01",
+    "partner_name": "Shri Mahila Sewa Sahakari Bank Ltd",
+    "partner_type": "Cooperative Bank",
+    "state": "",
+    "address_raw": "",
+    "pincode": ""
+  },
+  {
+    "partner_id": "CooperativeBank_109",
+    "partner_name": "Sakar-II",
+    "partner_type": "Cooperative Bank",
+    "state": "",
+    "address_raw": "Opp.Town Hall, Ellisbridge, Ahmedabad- 38006",
+    "pincode": ""
+  },
+  {
+    "partner_id": "CooperativeBank_02",
+    "partner_name": "Konoklata mahila Urban Cooperative",
+    "partner_type": "Cooperative Bank",
+    "state": "",
+    "address_raw": "Bank, Assam.",
+    "pincode": ""
+  },
+  {
+    "partner_id": "SFB_01",
+    "partner_name": "AU small finance bank",
+    "partner_type": "SFB",
+    "state": "",
+    "address_raw": "",
+    "pincode": ""
+  },
+  {
+    "partner_id": "SFB_02",
+    "partner_name": "Ujjiwan Small Finance Bank",
+    "partner_type": "SFB",
+    "state": "",
+    "address_raw": "Small Finance Bank- 02",
+    "pincode": ""
+  },
+  {
+    "partner_id": "OtherAgency_01",
+    "partner_name": "Assam North Eastern Development",
+    "partner_type": "Other Agency",
+    "state": "",
+    "address_raw": "Auction Center, GS Rd, Sanket Assam 781006",
+    "pincode": "781006"
+  },
+  {
+    "partner_id": "OtherAgency_02",
+    "partner_name": "Jharkhand Jharkhand Silk Textile &",
+    "partner_type": "Other Agency",
+    "state": "",
+    "address_raw": "(JHARCRAFT), Jharcraft, 834001",
+    "pincode": "834001"
+  },
+  {
+    "partner_id": "OtherAgency_03",
+    "partner_name": "SIDBI Small Industries Development",
+    "partner_type": "Other Agency",
+    "state": "",
+    "address_raw": "SIDBI Tower, 15, Ashok",
+    "pincode": ""
+  },
+  {
+    "partner_id": "SCA_01",
+    "partner_name": "Andhra Pradesh Scheduled Castes Cooperative Finance Corporation Ltd. (APSCCFC)",
+    "partner_type": "SCA",
+    "state": "Andhra Pradesh",
+    "address_raw": "SP River View Apartments, 3rd Floor, Tadepalli, Amaravathi – 522 501.",
+    "pincode": "522501"
+  },
+  {
+    "partner_id": "SCA_02",
+    "partner_name": "Andhra Pradesh State Financial Corporation (APSFC)",
+    "partner_type": "SCA",
+    "state": "Andhra Pradesh",
+    "address_raw": "APSFC Building, Plot OS No.2, 2nd Cross, 3rd Road, Industrial Park, Vijayawada – 520 007.",
+    "pincode": "520007"
+  },
+  {
+    "partner_id": "SCA_03",
+    "partner_name": "Assam State Development Corporation for SCs Ltd. (ASCDC)",
+    "partner_type": "SCA",
+    "state": "Assam",
+    "address_raw": "Swahid Dilip Hozori Path, Sarumotoria, Dispur, Guwahati – 781 006.",
+    "pincode": "781006"
+  },
+  {
+    "partner_id": "SCA_04",
+    "partner_name": "Bihar State SCs Co-operative Development Corporation Ltd. (BSSCCDC)",
+    "partner_type": "SCA",
+    "state": "Bihar",
+    "address_raw": "RN-212, Officers Colony (Block-A), Bailey Road, Patna – 800 001.",
+    "pincode": "800001"
+  },
+  {
+    "partner_id": "SCA_05",
+    "partner_name": "Chandigarh SCs, BCs & Minorities Financial & Development Corporation Ltd. (CSCFDC)",
+    "partner_type": "SCA",
+    "state": "Chandigarh",
+    "address_raw": "3rd Floor, Additional Town Hall Building, Sector-17-C, Chandigarh-160 017.",
+    "pincode": "160017"
+  },
+  {
+    "partner_id": "SCA_06",
+    "partner_name": "Chhatisgarh State Antavasayee Sahkari Fin. & Dev.Corpn., (CGSCFDC)",
+    "partner_type": "SCA",
+    "state": "Chhattisgarh",
+    "address_raw": "4th Floor, Business Complex, Chhattisgarh Housing Board Bhawan, Naya Raipur, Chhattisgarh - 492101.",
+    "pincode": "492101"
+  },
+  {
+    "partner_id": "SCA_07",
+    "partner_name": "Dadra & Nagar Haveli, Daman & Diu SCs/STs/OBCs & Minorities Financial & Development Corporation (DNDSFDC)",
+    "partner_type": "SCA",
+    "state": "Dadra & Nagar\nHaveli, Daman\n& Diu",
+    "address_raw": "Ground Floor, Right Wing, New Collectorate Building, Near Electricity Department, Opp. 66, KVA Sub- Station, 66 KVA Road, Silvassa – 396 230.",
+    "pincode": "396230"
+  },
+  {
+    "partner_id": "SCA_08",
+    "partner_name": "Delhi SC/ST/OBC/Minorities & Handicapped Financial & Development Corporation (DSFDC)",
+    "partner_type": "SCA",
+    "state": "Delhi",
+    "address_raw": "Ambedkar Bhawan, Sector-16, (Opp. Sector-11), Rohini, Delhi – 110 085.",
+    "pincode": "110085"
+  },
+  {
+    "partner_id": "SCA_09",
+    "partner_name": "The Managing Director, Gujarat SCs Development Corporation (GSCDC)",
+    "partner_type": "SCA",
+    "state": "Gujarat",
+    "address_raw": "Dr Jivraj Mehta Bhawan, Block – 10, II Floor, Old Sachivalaya, Gandhinagar – 382 010.",
+    "pincode": "382010"
+  },
+  {
+    "partner_id": "SCA_10",
+    "partner_name": "Dr. Ambedkar Antyodaya Vikas Nigam (S.C.) (DAAVN)",
+    "partner_type": "SCA",
+    "state": "Gujarat",
+    "address_raw": "Karmayogi Bhavan, Block No. 2, D-2 Wing, 4th Floor, Sector -10/B, Gandhinagar, Gujarat.",
+    "pincode": ""
+  },
+  {
+    "partner_id": "SCA_11",
+    "partner_name": "Goa State SCs & OBCs Finance and Development Corporation Ltd. (GSCOBCDC)",
+    "partner_type": "SCA",
+    "state": "Goa",
+    "address_raw": "4th Floor, Patto Centre, Near K.T.C. Bus Stand, Panaji, Goa – 403 001.",
+    "pincode": "403001"
+  },
+  {
+    "partner_id": "SCA_12",
+    "partner_name": "Haryana SCs Fin. and Development Corporation Ltd., (HSCDC)",
+    "partner_type": "SCA",
+    "state": "Haryana",
+    "address_raw": "SCO-2427-28, Sector 22-C, Chandigarh – 160 022.",
+    "pincode": "160022"
+  },
+  {
+    "partner_id": "SCA_13",
+    "partner_name": "Himachal Pradesh SCs & STs Development Corporation (HPSCSTDC)",
+    "partner_type": "SCA",
+    "state": "Himachal\nPradesh",
+    "address_raw": "Kalyan Bhawan, Near Ambusha Resort, Solan – 173212",
+    "pincode": "173212"
+  },
+  {
+    "partner_id": "SCA_14",
+    "partner_name": "Jharkhand State Scheduled Castes Cooperative Development Corporation (JSCDC)",
+    "partner_type": "SCA",
+    "state": "Jharkhand",
+    "address_raw": "Kalyan Complex, 3rd Floor, Balihar Road, Morabadi, Ranchi-834008.",
+    "pincode": "834008"
+  },
+  {
+    "partner_id": "SCA_15",
+    "partner_name": "J&K SCs, STs & OBCs Dev. Corpn. Ltd. (JKSCSTBCDC)",
+    "partner_type": "SCA",
+    "state": "Jammu &\nKashmir",
+    "address_raw": "Exchange Road, Near Red Cross Office, Srinagar – 190 001 (Office : May to October) & 135-A, Last Morh, Gandhi Nagar JAMMU -180 004 (Office : November to April)",
+    "pincode": "190001"
+  },
+  {
+    "partner_id": "SCA_16",
+    "partner_name": "Dr B. R. Ambedkar Development Corporation Ltd. (DBRADC)",
+    "partner_type": "SCA",
+    "state": "Karnataka",
+    "address_raw": "9th & 10th Floor, Visheshwariah Mini Tower, Dr Ambedkar Veedhi, Bengaluru – 560 001.",
+    "pincode": "560001"
+  },
+  {
+    "partner_id": "SCA_17",
+    "partner_name": "Kerala State Development Corporation for SCs & STs Ltd., (KSDC)",
+    "partner_type": "SCA",
+    "state": "Kerala",
+    "address_raw": "Town Hall Road, Thrissur – 680 020.",
+    "pincode": "680020"
+  },
+  {
+    "partner_id": "SCA_18",
+    "partner_name": "Kerala State Women's Development Corporation (KSWDC)",
+    "partner_type": "SCA",
+    "state": "Kerala",
+    "address_raw": "1st Floor, Transport Bhavan, KSRTC Building, East Fort, Attakulangara- 695023,",
+    "pincode": "695023"
+  },
+  {
+    "partner_id": "SCA_19",
+    "partner_name": "MP State Cooperative SC Finance & Development Corporation (MPSCFDC)",
+    "partner_type": "SCA",
+    "state": "Madhya Pradesh",
+    "address_raw": "Rajiv Gandhi Bhawan, 35, Shyamala Hills, Bhopal – 462 011.",
+    "pincode": "462011"
+  },
+  {
+    "partner_id": "SCA_20",
+    "partner_name": "Mahatma Phule BCs Development Corporation Ltd. (MPBCDC)",
+    "partner_type": "SCA",
+    "state": "Maharashtra",
+    "address_raw": "1-N, Supreme Shopping Centre, Gulmohar Cross Road No.9, J.V.P.D. Scheme, Juhu, Mumbai – 400 049.",
+    "pincode": "400049"
+  },
+  {
+    "partner_id": "SCA_21",
+    "partner_name": "Sahityaratna Lokshahir Annabhau Sathe Development Corporation Ltd.(SLASDC)",
+    "partner_type": "SCA",
+    "state": "Maharashtra",
+    "address_raw": "New Administration Building No.2, 3rd Floor, Ramkrushna Chemburkar Marg, Chembur (E), Mumbai – 400 071.",
+    "pincode": "400071"
+  },
+  {
+    "partner_id": "SCA_22",
+    "partner_name": "Sant Rohidas Leather Industries & Charmakar Development Corporation (LIDCOM)",
+    "partner_type": "SCA",
+    "state": "Maharashtra",
+    "address_raw": "Bombay Life Building, 5th Floor, 45, Veer Nariman Road, Mumbai – 400 001.",
+    "pincode": "400001"
+  },
+  {
+    "partner_id": "SCA_23",
+    "partner_name": "Manipur Tribal Development Corporation Ltd. (MTDC)",
+    "partner_type": "SCA",
+    "state": "Manipur",
+    "address_raw": "Lamphelpat, Imphal – 795 004.",
+    "pincode": "795004"
+  },
+  {
+    "partner_id": "SCA_24",
+    "partner_name": "Manipur SCs & STs Co- operative Dev. Bank (MSTCB)",
+    "partner_type": "SCA",
+    "state": "Manipur",
+    "address_raw": "Nambun Long, Stadium Road, Imphal East, MANIPUR-795001.",
+    "pincode": "795001"
+  },
+  {
+    "partner_id": "SCA_25",
+    "partner_name": "Meghalaya Cooperative Apex Bank Ltd. (MCAB)",
+    "partner_type": "SCA",
+    "state": "Meghalaya",
+    "address_raw": "M.G. Road, Kutchery, Shillong – 793 001.",
+    "pincode": "793001"
+  },
+  {
+    "partner_id": "SCA_26",
+    "partner_name": "Mizoram Urban Cooperative Development Bank Ltd. (MUCO Bank)",
+    "partner_type": "SCA",
+    "state": "Mizoram",
+    "address_raw": "Lawlsawmiliani Building (Top Floor), Zarkawt, Aizwal -796 001.",
+    "pincode": "796001"
+  },
+  {
+    "partner_id": "SCA_27",
+    "partner_name": "Mizoram Khadi & Village Industries & Board (MKVIB)",
+    "partner_type": "SCA",
+    "state": "Mizoram",
+    "address_raw": "“Zorun” Zarkawt, Aizwal -796 007.",
+    "pincode": "796007"
+  },
+  {
+    "partner_id": "SCA_28",
+    "partner_name": "Odisha SCs & STs Dev. Finance Co-op. Corpn. Ltd. (OSFDC)",
+    "partner_type": "SCA",
+    "state": "Odisha",
+    "address_raw": "Lewis Road, Bhubaneshwar – 751 014.",
+    "pincode": "751014"
+  },
+  {
+    "partner_id": "SCA_29",
+    "partner_name": "Puducherry Adi Dravidar Dev. Corpn. Ltd. (PADCO)",
+    "partner_type": "SCA",
+    "state": "Puducherry",
+    "address_raw": "III Floor, Directorate of Adi Dravidar Welfare Department, Thattanchavady, Puducherry - 605 009",
+    "pincode": "605009"
+  },
+  {
+    "partner_id": "SCA_30",
+    "partner_name": "Punjab Scheduled Castes Land Development & Finance Corporation (PSCLDFC)",
+    "partner_type": "SCA",
+    "state": "Punjab",
+    "address_raw": "SCO No.101-102-103, Sector 17-C, Chandigarh – 160 017.",
+    "pincode": "160017"
+  },
+  {
+    "partner_id": "SCA_31",
+    "partner_name": "Rajasthan SCs & STs Fin. & Dev. Co-op. Corporation Ltd. (RSCDC)",
+    "partner_type": "SCA",
+    "state": "Rajasthan",
+    "address_raw": "III Floor, Central Block, Nehru Sahakar Bhawan, Bhawani Singh Marg, Jaipur–302005.",
+    "pincode": "302005"
+  },
+  {
+    "partner_id": "SCA_32",
+    "partner_name": "Sikkim Scheduled Castes Scheduled Tribes & Backward Classes Development Corporation (SSCSTBCDC)",
+    "partner_type": "SCA",
+    "state": "Sikkim",
+    "address_raw": "Bhanupath, Gangtok, Sikkim – 737 101.",
+    "pincode": "737101"
+  },
+  {
+    "partner_id": "SCA_33",
+    "partner_name": "Tamil Nadu Adi Dravidar Housing & Development Corporation Ltd. (TAHDCO)",
+    "partner_type": "SCA",
+    "state": "Tamil Nadu",
+    "address_raw": "No.31, Cenotaph Road, 2nd Lane, Teynamtet, Chennai -600 018.",
+    "pincode": "600018"
+  },
+  {
+    "partner_id": "SCA_34",
+    "partner_name": "Tripura Scheduled Castes Co-op. Devp. Corpn. Ltd. (TSCDC)",
+    "partner_type": "SCA",
+    "state": "Tripura",
+    "address_raw": "Krishna Nagar P.O. Lake Chomubani, Agartala – 799 001",
+    "pincode": "799001"
+  },
+  {
+    "partner_id": "SCA_35",
+    "partner_name": "Uttarakhand Bahu-udeshiya Vitta Evam Vikas Nigam (UBVEVN)",
+    "partner_type": "SCA",
+    "state": "Uttarakhand",
+    "address_raw": "Janjati Directorate, New Building, Bhagat Singh Clolony (Adhoiwala), Dehradun-248 001",
+    "pincode": "248001"
+  },
+  {
+    "partner_id": "SCA_36",
+    "partner_name": "UP Sahkari Gram Vikas Bank Ltd.",
+    "partner_type": "SCA",
+    "state": "Uttar Pradesh",
+    "address_raw": "10, Mall Avenue, Lucknow, Uttar Pradesh-226001.",
+    "pincode": "226001"
+  },
+  {
+    "partner_id": "SCA_37",
+    "partner_name": "UP Scheduled Castes Finance & Dev. Corpn. Ltd., (UPSCFDC)",
+    "partner_type": "SCA",
+    "state": "Uttar Pradesh",
+    "address_raw": "B-912, Sector-C, Mahanagar, Lucknow – 226 006.",
+    "pincode": "226006"
+  },
+  {
+    "partner_id": "SCA_38",
+    "partner_name": "West Bengal SCs, STs & OBC Development & Finance Corporation (WBSCSTOBCDFC)",
+    "partner_type": "SCA",
+    "state": "West Bengal",
+    "address_raw": "CF 217/A/1 Salt Lake Sector –I, (Mangolic Building) Kolkata – 700 064.",
+    "pincode": "700064"
+  }
+]

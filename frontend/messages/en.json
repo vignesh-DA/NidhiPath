@@ -1,0 +1,96 @@
+{
+  "common": {
+    "app_name": "NidhiPath",
+    "tagline": "AI-Driven Scheme Matching for Marginalized Entrepreneurs",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "error": "Error",
+    "continue_as_guest": "Continue as guest"
+  },
+  "nav": {
+    "home": "Home",
+    "find_scheme": "Find Scheme",
+    "calculator": "Calculator",
+    "partners": "Partners",
+    "qa": "Q&A",
+    "login": "Login"
+  },
+  "landing": {
+    "badge": "Ministry of Social Justice & Empowerment",
+    "headline": "Your path to financial empowerment starts here",
+    "subtitle": "Find the right NSFDC concessional credit scheme, calculate your EMI, and locate the nearest authorized channel partner — all in one place.",
+    "path_form_title": "Fill a form",
+    "path_form_desc": "Answer 4 simple questions about your project type, cost, and income. Get an instant, exact match.",
+    "path_form_cta": "Start now",
+    "path_ai_title": "Describe your need",
+    "path_ai_desc": "Tell us in your own words what you're looking for. Our AI will extract the details and find matching schemes.",
+    "path_ai_cta": "AI Intake (Coming Soon)",
+    "feature_match_title": "Smart Scheme Match",
+    "feature_match_desc": "Deterministic rule engine matches you to NSFDC credit schemes in under 100ms. No AI guesswork — 100% reproducible results.",
+    "feature_calc_title": "EMI Calculator",
+    "feature_calc_desc": "Calculate projected EMIs with scheme-enforced caps. See moratorium periods, interest breakdowns, and repayment schedules.",
+    "feature_locate_title": "Partner Locator",
+    "feature_locate_desc": "Find the nearest SCA, bank, or NBFC-MFI authorized to process your loan category, with health-based ranking.",
+    "income_cap_title": "Income Eligibility Cap",
+    "income_cap_desc": "This platform uses ₹5,00,000 as the annual income cap per the Problem Statement text. The live NSFDC figure is ₹3,00,000. Both figures are stored — this is a documented, deliberate choice for demo accuracy."
+  },
+  "intake": {
+    "title": "Tell us about your project",
+    "subtitle": "Answer 4 questions to find matching NSFDC credit schemes instantly.",
+    "project_type_label": "What is your project purpose?",
+    "type_business": "Business / Self Employment",
+    "type_business_desc": "Start or grow your enterprise",
+    "type_education": "Education",
+    "type_education_desc": "Fund your studies",
+    "education_status_label": "Education status",
+    "education_admission": "Admission Secured",
+    "education_enrolled": "Currently Enrolled",
+    "cost_label": "Estimated project cost (₹)",
+    "cost_hint": "NSFDC schemes cover projects from ₹0 to ₹50,00,000",
+    "income_label": "Annual family income (₹)",
+    "income_hint": "Eligibility cap: ₹5,00,000 per annum",
+    "state_label": "Your state (for welfare schemes & SCA matching)",
+    "submit": "Find matching schemes"
+  },
+  "recommendation": {
+    "title": "Your Scheme Recommendations",
+    "primary_label": "NSFDC Credit Schemes",
+    "primary_badge": "Exact Match",
+    "secondary_label": "Related Welfare Schemes",
+    "secondary_badge": "Approximate Match",
+    "top_pick": "TOP PICK",
+    "max_loan": "Max Loan",
+    "tenure": "Tenure",
+    "moratorium": "Moratorium",
+    "coverage": "Coverage",
+    "calculate_emi": "Calculate EMI",
+    "find_partners": "Find Partners",
+    "handoff_title": "Application Process",
+    "handoff_desc": "This platform helps you find the right scheme — it does NOT process loan applications. To apply, visit the PM-SURAJ Portal with your matched scheme details."
+  },
+  "calculator": {
+    "title": "EMI Calculator",
+    "monthly_emi": "Monthly EMI",
+    "effective_loan": "Effective Loan",
+    "total_interest": "Total Interest",
+    "total_payment": "Total Payment",
+    "total_duration": "Total Duration",
+    "caps_applied": "Caps Applied",
+    "show_schedule": "Show Amortization Schedule",
+    "hide_schedule": "Hide Amortization Schedule"
+  },
+  "locator": {
+    "title": "Channel Partners",
+    "filter_pipeline": "Filter Pipeline",
+    "proximity_unavailable": "Proximity Not Available",
+    "known_limitations": "Known Limitations",
+    "apply_cta": "Apply via PM-SURAJ Portal"
+  },
+  "footer": {
+    "built_for": "Built for the Ministry of Social Justice and Empowerment (MoSJE)",
+    "disclaimer": "This platform does NOT process loan applications. It routes you to the official PM-SURAJ Portal for application submission."
+  }
+}

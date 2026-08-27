@@ -8,8 +8,9 @@ wheels/
 *.egg
 
 # Virtual environments
-.venv
+.venv/
 venv/
+vevn/
 env/
 
 # Environment variables
@@ -54,5 +55,10 @@ htmlcov/
 
 # pytest
 .pytest_cache/
+
+# Internal prompts / agent docs (not for public repo)
+prompt.md
+BUILD_PROMPT.md
+AGENTS.md
 
 .env.example
