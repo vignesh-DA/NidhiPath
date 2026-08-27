@@ -1,4 +1,4 @@
-"""
+g"""
 NidhiPath — FastAPI Application Entrypoint
 
 AI-Driven Scheme Matching for Marginalized Entrepreneurs (NSFDC, MoSJE)
@@ -17,6 +17,7 @@ from app.config import settings
 from app.api.routes_recommender import router as recommender_router
 from app.api.routes_calculator import router as calculator_router
 from app.api.routes_locator import router as locator_router
+from app.api.routes_rag import router as rag_router
 
 
 @asynccontextmanager
@@ -59,10 +60,7 @@ app.add_middleware(
 app.include_router(recommender_router, prefix="/api/v1", tags=["Scheme Recommender"])
 app.include_router(calculator_router, prefix="/api/v1", tags=["Financial Calculator"])
 app.include_router(locator_router, prefix="/api/v1", tags=["Partner Locator"])
-
-# Module 4 routes (RAG) — added when Module 4 is built
-# from app.api.routes_rag import router as rag_router
-# app.include_router(rag_router, prefix="/api/v1", tags=["RAG Q&A"])
+app.include_router(rag_router, prefix="/api/v1", tags=["LLM Intake + RAG Q&A"])
 
 
 @app.get("/", tags=["Health"])
@@ -72,12 +70,12 @@ async def root():
         "name": "NidhiPath API",
         "version": "0.1.0",
         "status": "healthy",
-        "modules": {
-            "recommender": "active",
-            "calculator": "active",
-            "locator": "active",
-            "rag": "pending",
-        },
+         "modules": {
+             "recommender": "active",
+             "calculator": "active",
+             "locator": "active",
+             "rag": "active",
+         },
     }
 
 
