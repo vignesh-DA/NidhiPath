@@ -92,7 +92,7 @@ def _matches_state(scheme: dict, user_state: Optional[str]) -> bool:
     Check if scheme is available to user's state.
     Central schemes always match. State schemes match only if states align.
     """
-    issuing_state = scheme.get("issuing_state", "").strip().lower()
+    issuing_state = (scheme.get("issuing_state") or "").strip().lower()
 
     # Central schemes match everyone
     if issuing_state in ("central", "all india", "all_india", "india", ""):

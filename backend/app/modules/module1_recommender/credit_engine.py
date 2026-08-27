@@ -116,7 +116,14 @@ def load_nsfdc_schemes(data_dir: Optional[Path] = None) -> list[dict]:
         )
 
     with open(schemes_path, "r", encoding="utf-8") as f:
-        _schemes_cache = json.load(f)
+        data = json.load(f)
+
+    # JSON is wrapped: {"schemes": [...], "currency": ..., ...}
+    # Extract just the list of scheme records.
+    if isinstance(data, dict):
+        _schemes_cache = data.get("schemes", [])
+    else:
+        _schemes_cache = data  # bare list (future format)
 
     return _schemes_cache
 
