@@ -1,12 +1,58 @@
-# Python-generated files
+# Python
 __pycache__/
 *.py[oc]
 build/
 dist/
 wheels/
 *.egg-info
+*.egg
 
 # Virtual environments
 .venv
+venv/
+env/
 
-.agents
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Agents / Skills (local only)
+.agents/
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+frontend/.next/
+frontend/node_modules/
+
+# Data — raw source docs (large, not version controlled)
+data/raw/
+
+# Reference — IFSC CSV is 180K+ rows, track via Git LFS or exclude
+# Uncomment the line below if you don't want to track ifsc.csv in git:
+# data/reference/ifsc.csv
+
+# Logs
+*.log
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# pytest
+.pytest_cache/
+
+.env.example

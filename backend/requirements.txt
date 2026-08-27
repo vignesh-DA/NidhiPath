@@ -1,0 +1,23 @@
+# Backend dependencies — NidhiPath
+# Core
+fastapi==0.115.12
+uvicorn[standard]==0.34.3
+pydantic==2.11.4
+python-dotenv==1.1.0
+
+# Database
+supabase==2.15.2
+psycopg2-binary==2.9.10
+asyncpg==0.30.0
+
+# HTTP client
+httpx==0.28.1
+
+# Module 4 — RAG / LLM (install when ready)
+# groq==0.25.0
+# pgvector==0.3.6
+# tiktoken==0.9.0
+
+# Testing
+pytest==8.4.1
+pytest-asyncio==1.0.0
