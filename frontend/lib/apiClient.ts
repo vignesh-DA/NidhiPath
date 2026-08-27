@@ -9,9 +9,11 @@ import type {
   RecommendRequest,
   RecommendResponse,
   EmiRequest,
-  EmiBreakdown,
+  EmiResponse,
   LocateRequest,
   LocateResponse,
+  IntakeExtractResult,
+  QAResult,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -63,8 +65,8 @@ export async function recommendSchemes(input: RecommendRequest): Promise<Recomme
 
 // ─── Module 2: Financial Calculator ─────────────────────────────────────────
 
-export async function calculateEmi(input: EmiRequest): Promise<EmiBreakdown> {
-  return apiPost<EmiRequest, EmiBreakdown>("/calculate-emi", input);
+export async function calculateEmi(input: EmiRequest): Promise<EmiResponse> {
+  return apiPost<EmiRequest, EmiResponse>("/calculate-emi", input);
 }
 
 // ─── Module 3: Partner Locator ──────────────────────────────────────────────
@@ -73,10 +75,33 @@ export async function locatePartners(input: LocateRequest): Promise<LocateRespon
   return apiPost<LocateRequest, LocateResponse>("/locate-partners", input);
 }
 
+// ─── Module 4: LLM Intake + RAG Q&A ─────────────────────────────────────────
+
+export async function extractIntake(text: string): Promise<IntakeExtractResult> {
+  return apiPost<{ text: string }, IntakeExtractResult>("/intake/extract", { text });
+}
+
+export async function askQuestion(
+  question: string,
+  schemeId?: string,
+  language: string = "en",
+): Promise<QAResult> {
+  return apiPost("/qa", { question, scheme_id: schemeId, language });
+}
+
 // ─── Health Check ───────────────────────────────────────────────────────────
+// NOTE: /health is defined at the API ROOT (http://localhost:8000/health),
+// NOT under the /api/v1 prefix — so we strip the prefix before calling.
+
+const API_ROOT = API_BASE.replace(/\/api\/v1\/?$/, "");
 
 export async function healthCheck(): Promise<Record<string, unknown>> {
-  return apiGet<Record<string, unknown>>("/health");
+  const response = await fetch(`${API_ROOT}/health`);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new ApiError(response.status, errorBody.detail || response.statusText);
+  }
+  return response.json() as Promise<Record<string, unknown>>;
 }
 
 export { ApiError };

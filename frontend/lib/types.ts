@@ -83,13 +83,21 @@ export interface EmiRequest {
   scheme_id: string;
   requested_amount: number;
   requested_months: number;
-  interest_rate_pct: number;
-  max_loan_amount?: number;
   project_cost: number;
-  project_cost_coverage_pct: number;
+  include_schedule?: boolean;
+  // Scheme-owned values — optional; the backend resolves them
+  // server-side from scheme_id and overrides whatever is sent here.
+  interest_rate_pct?: number;
+  max_loan_amount?: number;
+  project_cost_coverage_pct?: number;
   tenure_years?: number;
   moratorium_months?: number;
-  include_schedule?: boolean;
+}
+
+export interface EmiResponse extends EmiBreakdown {
+  scheme_resolved: boolean;
+  scheme_name?: string;
+  resolution_note: string;
 }
 
 export interface ScheduleEntry {
@@ -116,6 +124,45 @@ export interface EmiBreakdown {
   caps_applied: string[];
   assumption_note: string;
   schedule: ScheduleEntry[];
+}
+
+// ─── Module 4: LLM Intake + RAG Q&A ─────────────────────────────────────────
+
+export interface IntakeExtractResult {
+  estimated_cost?: number | null;
+  income_level?: number | null;
+  project_type?: ProjectType | null;
+  education_status?: EducationStatus | null;
+  user_state?: string | null;
+  caste_scope?: string[] | null;
+  confidence: number;
+  missing_fields: string[];
+  notes: string;
+  source: "llm" | "heuristic";
+  needs_confirmation: boolean;
+  raw_text: string;
+  message?: string;
+}
+
+export interface QASource {
+  chunk_id: string;
+  scheme_id: string;
+  scheme_name: string;
+  section: string;
+  text: string;
+  score: number;
+}
+
+export interface QAResult {
+  answer: string;
+  intent: "structured" | "narrative";
+  intent_field?: string | null;
+  scheme_id?: string | null;
+  scheme_name?: string | null;
+  sources: QASource[];
+  language: string;
+  used_llm: boolean;
+  disclaimer: string;
 }
 
 // ─── Module 3: Partner Locator ──────────────────────────────────────────────

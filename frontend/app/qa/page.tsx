@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { askQuestion, ApiError } from "@/lib/apiClient";
+import type { QAResult } from "@/lib/types";
 
 interface Message {
   id: string;
@@ -9,16 +11,18 @@ interface Message {
   text: string;
   source?: string;
   verified?: boolean;
+  intent?: "structured" | "narrative";
 }
 
 export default function QAPage() {
   const [inputMessage, setInputMessage] = useState("");
+  const [isThinking, setIsThinking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       sender: "assistant",
       text: "Namaste! I am the NidhiPath AI Assistant. You can ask me questions about NSFDC schemes, required documents, interest rates, or eligibility criteria. How can I assist you today?",
-      source: "NSFDC Official Guidelines 2026",
+      source: "Grounded in scheme records",
       verified: true,
     },
   ]);
@@ -30,8 +34,11 @@ export default function QAPage() {
     "What is the interest rate for women beneficiaries?",
   ];
 
-  const handleSend = (text: string) => {
-    if (!text.trim()) return;
+  // Calls the real backend RAG Q&A endpoint (POST /api/v1/qa).
+  // Structured questions are answered from scheme records with zero LLM calls;
+  // narrative questions use retrieval + generation. Never a mock response.
+  const handleSend = async (text: string) => {
+    if (!text.trim() || isThinking) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -41,33 +48,47 @@ export default function QAPage() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputMessage("");
+    setIsThinking(true);
 
-    // Realistic response simulation based on verified scheme documentation
-    setTimeout(() => {
-      let reply = "Under NSFDC guidelines, schemes cover up to 90% of project costs for Scheduled Caste beneficiaries with annual family income up to ₹5,00,000 (Problem Statement baseline).";
-      let source = "NSFDC Operational Guidelines";
+    try {
+      const res: QAResult = await askQuestion(text.trim());
 
-      if (text.toLowerCase().includes("document")) {
-        reply = "Required documents include: (1) Aadhaar Card, (2) Caste Certificate issued by competent authority, (3) Income Certificate (< ₹5 Lakhs), (4) Bank Account Details / IFSC, and (5) Detailed Project Report (for loans above ₹1.4 Lakhs).";
-        source = "NSFDC Eligibility & Documentation Manual";
-      } else if (text.toLowerCase().includes("moratorium")) {
-        reply = "During the moratorium period (typically 3 to 6 months depending on the scheme), no principal repayments are due, allowing your business or studies to stabilize before EMI amortization begins.";
-        source = "NSFDC Credit Amortization Standard";
-      } else if (text.toLowerCase().includes("rate") || text.toLowerCase().includes("interest")) {
-        reply = "Beneficiary interest rates range from 6.5% to 8.0% per annum under primary credit schemes like Micro Finance and Term Loan. Special concessional rebates apply through channel partners.";
-        source = "nsfdc.nic.in Official Rate Schedule";
-      }
+      const sourceLabel =
+        res.sources && res.sources.length > 0
+          ? `${res.sources[0].scheme_name} — ${res.sources[0].section}`
+          : res.scheme_name
+            ? `${res.scheme_name} (scheme record)`
+            : res.used_llm
+              ? "RAG retrieval + LLM generation"
+              : "Scheme records (structured lookup)";
 
       const botMsg: Message = {
         id: (Date.now() + 1).toString(),
         sender: "assistant",
-        text: reply,
-        source: source,
+        text: res.answer,
+        source: sourceLabel,
         verified: true,
+        intent: res.intent,
       };
 
       setMessages((prev) => [...prev, botMsg]);
-    }, 600);
+    } catch (err: unknown) {
+      const detail =
+        err instanceof ApiError
+          ? err.detail
+          : "Could not reach the NidhiPath API. Is the backend running on port 8000?";
+
+      const botMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: `Sorry, I could not answer that. ${detail}`,
+        verified: false,
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+    } finally {
+      setIsThinking(false);
+    }
   };
 
   return (
@@ -176,9 +197,10 @@ export default function QAPage() {
               />
               <button
                 type="submit"
-                className="px-5 py-3 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-sm font-bold shadow-xs hover:shadow-sm transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                disabled={isThinking}
+                className="px-5 py-3 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-sm font-bold shadow-xs hover:shadow-sm transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>Ask</span>
+                <span>{isThinking ? "Thinking…" : "Ask"}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="22" y1="2" x2="11" y2="13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />

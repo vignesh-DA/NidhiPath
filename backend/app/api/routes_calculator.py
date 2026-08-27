@@ -57,14 +57,21 @@ class EmiResponse(EmiBreakdown):
     resolution_note: str = ""
 
 
+def _normalize_id(sid: str) -> str:
+    return sid.lower().replace("-", "").replace("_", "").strip()
+
+
 def _resolve_scheme(scheme_id: str) -> tuple[Optional[dict], bool]:
     """Look up a scheme by id in the authoritative NSFDC record set."""
     try:
         schemes = load_nsfdc_schemes()
     except FileNotFoundError:
         return None, False
+    target = _normalize_id(scheme_id)
     for scheme in schemes:
-        if str(scheme.get("scheme_id", "")) == scheme_id:
+        sid = _normalize_id(str(scheme.get("scheme_id", "")))
+        name = _normalize_id(str(scheme.get("scheme_name", "")))
+        if sid == target or target in sid or (len(target) > 3 and target in name):
             return scheme, True
     return None, False
 

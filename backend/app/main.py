@@ -1,4 +1,4 @@
-g"""
+"""
 NidhiPath — FastAPI Application Entrypoint
 
 AI-Driven Scheme Matching for Marginalized Entrepreneurs (NSFDC, MoSJE)

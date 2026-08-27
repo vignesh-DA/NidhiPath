@@ -92,20 +92,24 @@ def _parse_indian_amount(raw: str) -> Optional[float]:
     return value
 
 
-def _amounts_with_context(text: str) -> list[tuple[float, str]]:
-    """Return (amount, surrounding_context) pairs."""
+def _amounts_with_context(text: str) -> list[tuple[float, str, str]]:
+    """Return (amount, before_ctx, after_ctx) pairs."""
     pattern = re.compile(
         r"((?:₹|rs\.?\s*)?\d[\d,]*(?:\.\d+)?\s*(?:lakh|lac|lakhs|crore|crores|लाख|करोड़)?)",
         re.IGNORECASE,
     )
-    found: list[tuple[float, str]] = []
+    found: list[tuple[float, str, str]] = []
     for match in pattern.finditer(text):
         amount = _parse_indian_amount(match.group(1))
         if amount is None or amount <= 0:
             continue
-        start = max(0, match.start() - 40)
-        end = min(len(text), match.end() + 40)
-        found.append((amount, text[start:end].lower()))
+        before = text[max(0, match.start() - 35):match.start()].lower()
+        if "." in before:
+            before = before.rsplit(".", 1)[-1]
+        after = text[match.end():min(len(text), match.end() + 25)].lower()
+        if "." in after:
+            after = after.split(".", 1)[0]
+        found.append((amount, before, after))
     return found
 
 
@@ -151,15 +155,24 @@ def heuristic_extract(text: str) -> IntakeExtractResult:
     income_level: Optional[float] = None
     estimated_cost: Optional[float] = None
     income_hints = ("income", "earn", "salary", "आय", "कमाई", "family income")
-    cost_hints = ("cost", "project", "need", "loan", "want", "require", "खर्च", "लागत", "कर्ज", "लोन")
+    cost_hints = ("cost", "project", "need", "loan", "want", "require", "tuition", "खर्च", "लागत", "कर्ज", "लोन")
 
-    for amount, ctx in _amounts_with_context(raw):
-        if any(h in ctx for h in income_hints) and income_level is None:
+    for amount, before, after in _amounts_with_context(raw):
+        is_income = any(h in before for h in income_hints) or any(h in after for h in income_hints)
+        is_cost = any(h in before for h in cost_hints) or any(h in after for h in cost_hints)
+
+        if is_income and not is_cost and income_level is None:
             income_level = amount
-        elif any(h in ctx for h in cost_hints) and estimated_cost is None:
+        elif is_cost and not is_income and estimated_cost is None:
+            estimated_cost = amount
+        elif is_income and income_level is None:
+            income_level = amount
+        elif is_cost and estimated_cost is None:
             estimated_cost = amount
         elif estimated_cost is None:
             estimated_cost = amount
+        elif income_level is None:
+            income_level = amount
 
     caste_scope: Optional[list[str]] = None
     if re.search(r"\bsc\b|scheduled caste|अनुसूचित जाति", lowered):

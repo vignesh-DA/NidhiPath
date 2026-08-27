@@ -43,6 +43,10 @@ def _scheme_id_of(scheme: dict) -> str:
     return str(raw)
 
 
+def _normalize_id(sid: str) -> str:
+    return sid.lower().replace("-", "").replace("_", "").strip()
+
+
 def find_scheme(
     scheme_id: Optional[str],
     nsfdc: Optional[list[dict]] = None,
@@ -52,11 +56,16 @@ def find_scheme(
     if not scheme_id:
         return None, ""
     sid = str(scheme_id)
+    target = _normalize_id(sid)
     for scheme in (nsfdc if nsfdc is not None else _load_nsfdc()):
-        if _scheme_id_of(scheme) == sid:
+        norm_sid = _normalize_id(_scheme_id_of(scheme))
+        norm_name = _normalize_id(str(scheme.get("scheme_name", "")))
+        if norm_sid == target or target in norm_sid or (len(target) > 3 and target in norm_name):
             return scheme, "nsfdc"
     for scheme in (welfare if welfare is not None else _load_welfare()):
-        if _scheme_id_of(scheme) == sid or str(scheme.get("canonical_scheme_id") or "") == sid:
+        norm_sid = _normalize_id(_scheme_id_of(scheme))
+        norm_name = _normalize_id(str(scheme.get("scheme_name", "")))
+        if norm_sid == target or target in norm_sid or (len(target) > 3 and target in norm_name):
             return scheme, "welfare"
     return None, ""
 
