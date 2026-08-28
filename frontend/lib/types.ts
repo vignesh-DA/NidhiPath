@@ -115,6 +115,9 @@ export interface EmiBreakdown {
   effective_tenure_months: number;
   effective_interest_rate_annual: number;
   effective_interest_rate_monthly: number;
+  effective_interest_rate_periodic: number;
+  installments_per_year: number;
+  payment_frequency: "monthly" | "quarterly";
   emi_amount: number;
   total_payment: number;
   total_interest: number;

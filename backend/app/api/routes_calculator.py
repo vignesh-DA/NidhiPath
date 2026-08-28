@@ -19,7 +19,11 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.modules.module1_recommender.credit_engine import load_nsfdc_schemes
-from app.modules.module2_calculator.emi import calculate_emi, EmiBreakdown
+from app.modules.module2_calculator.emi import (
+    calculate_emi,
+    resolve_payment_frequency,
+    EmiBreakdown,
+)
 
 
 router = APIRouter()
@@ -48,6 +52,10 @@ class EmiRequest(BaseModel):
     project_cost_coverage_pct: Optional[float] = Field(None, description="Ignored when scheme resolves server-side")
     tenure_years: Optional[float] = Field(None, description="Ignored when scheme resolves server-side")
     moratorium_months: Optional[int] = Field(None, description="Ignored when scheme resolves server-side")
+    payment_frequency: Optional[str] = Field(
+        None,
+        description="Only used when scheme_id does not match an NSFDC record: 'monthly' | 'quarterly'. Ignored otherwise (cadence is scheme-owned).",
+    )
 
 
 class EmiResponse(EmiBreakdown):
@@ -88,6 +96,9 @@ async def calculate_emi_endpoint(request: EmiRequest):
 
     Explicit assumption stated in response:
         Interest does NOT accrue during moratorium period.
+        Payment cadence: NSFDC's Micro Finance Scheme uses QUARTERLY installments
+        (auto-applied); all other schemes use monthly — every response's
+        assumption_note states which cadence was used and any limitation.
     """
     scheme, resolved = _resolve_scheme(request.scheme_id)
 
@@ -98,6 +109,13 @@ async def calculate_emi_endpoint(request: EmiRequest):
         coverage = float(scheme.get("project_cost_coverage_pct", 90))
         tenure = scheme.get("tenure_years")
         moratorium = scheme.get("moratorium_months")
+        # Cadence is scheme-owned like the rate: NSFDC's Micro Finance Scheme
+        # officially repays in QUARTERLY installments — resolved server-side,
+        # client value ignored.
+        payment_frequency = resolve_payment_frequency(
+            str(scheme.get("scheme_id") or ""),
+            str(scheme.get("scheme_name") or ""),
+        )
         scheme_name = scheme.get("scheme_name")
         note = (
             "Scheme-owned parameters (interest rate, max loan, coverage, tenure, "
@@ -120,6 +138,7 @@ async def calculate_emi_endpoint(request: EmiRequest):
         coverage = request.project_cost_coverage_pct if request.project_cost_coverage_pct is not None else 90.0
         tenure = request.tenure_years
         moratorium = request.moratorium_months
+        payment_frequency = (request.payment_frequency or "monthly").lower()
         scheme_name = None
         note = (
             "scheme_id did not match an NSFDC record; client-supplied scheme "
@@ -137,6 +156,7 @@ async def calculate_emi_endpoint(request: EmiRequest):
         tenure_years=tenure,
         moratorium_months=moratorium,
         include_schedule=request.include_schedule,
+        payment_frequency=payment_frequency,
     )
 
     return EmiResponse(

@@ -217,7 +217,9 @@ export default function CalculatorPage() {
                 {/* Hero EMI Display */}
                 <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-2xl p-5 text-center shadow-xs">
                   <span className="text-xs font-bold text-[#047857] uppercase tracking-wider block">
-                    Calculated Monthly EMI
+                    {result.payment_frequency === "quarterly"
+                      ? "Calculated Quarterly Installment"
+                      : "Calculated Monthly EMI"}
                   </span>
                   <span className="text-4xl sm:text-5xl font-extrabold text-[#16A34A] tracking-tight block my-2">
                     {formatCurrency(result.emi_amount)}
@@ -287,7 +289,13 @@ export default function CalculatorPage() {
                   className="w-full py-2 text-xs font-bold text-[#6B7280] hover:text-[#111827] transition-colors"
                   id="btn-toggle-schedule"
                 >
-                  {showSchedule ? "▲ Hide Monthly Schedule" : "▼ Show Month-by-Month Schedule"}
+                  {showSchedule
+                    ? result.payment_frequency === "quarterly"
+                      ? "▲ Hide Quarterly Schedule"
+                      : "▲ Hide Monthly Schedule"
+                    : result.payment_frequency === "quarterly"
+                      ? "▼ Show Quarter-by-Quarter Schedule"
+                      : "▼ Show Month-by-Month Schedule"}
                 </button>
 
               </div>
@@ -299,7 +307,7 @@ export default function CalculatorPage() {
                 <table className="w-full text-xs">
                   <thead className="sticky top-0 bg-white border-b border-[#E5EBE5]">
                     <tr className="text-[#6B7280] text-left">
-                      <th className="py-2">Mth</th>
+                      <th className="py-2">{result.payment_frequency === "quarterly" ? "Qtr" : "Mth"}</th>
                       <th className="py-2">Type</th>
                       <th className="py-2 text-right">EMI</th>
                       <th className="py-2 text-right">Interest</th>

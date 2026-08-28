@@ -9,6 +9,14 @@ Formula:
     P = min(user_requested_amount, max_loan_amount, project_cost × project_cost_coverage_pct)
     n = min(user_requested_months, tenure_years × 12)
 
+Payment cadence (scheme-owned, like the interest rate):
+    NSFDC's Micro Finance Scheme officially "repaid in quarterly instalments
+    within 4 years" (verified from the live NSFDC scheme page). Quarterly
+    cadence is applied automatically for that scheme (see
+    resolve_payment_frequency); every other scheme uses standard monthly
+    installments. Whenever a result is shown on monthly cadence while NSFDC's
+    official structure is quarterly, the assumption_note MUST say so
+    explicitly — silence on this is the one failure mode to avoid.
 Moratorium:
     EMI payments begin at month moratorium_months + 1.
 
@@ -21,7 +29,8 @@ Null handling:
     - moratorium_months: null → treat as 0
 """
 
-from typing import Optional
+import math
+from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 
@@ -40,6 +49,9 @@ class EmiInput(BaseModel):
     project_cost_coverage_pct: float = Field(90.0, gt=0, le=100, description="% of project cost the scheme covers")
     tenure_years: Optional[float] = Field(None, description="Maximum tenure in years")
     moratorium_months: Optional[int] = Field(None, ge=0, description="Moratorium period in months (null = 0)")
+    payment_frequency: Literal["monthly", "quarterly"] = Field(
+        "monthly", description="Installment cadence — scheme-owned for NSFDC schemes"
+    )
 
 
 class EmiBreakdown(BaseModel):
@@ -51,6 +63,9 @@ class EmiBreakdown(BaseModel):
     effective_tenure_months: int  # n — actual repayment months
     effective_interest_rate_annual: float  # annual % (for display)
     effective_interest_rate_monthly: float  # r — monthly decimal (for transparency)
+    effective_interest_rate_periodic: float = 0.0  # r per installment period (decimal)
+    installments_per_year: int = 12  # 12 = monthly, 4 = quarterly
+    payment_frequency: str = "monthly"  # "monthly" | "quarterly"
 
     # EMI result
     emi_amount: float  # Monthly EMI in ₹
@@ -75,6 +90,31 @@ class EmiBreakdown(BaseModel):
     schedule: list[dict] = Field(default_factory=list, description="Month-by-month repayment schedule")
 
 
+# ─── Payment Cadence Resolver (scheme-owned, like the interest rate) ─────────
+
+# NSFDC's Micro Finance Scheme officially "repaid in quarterly instalments
+# within 4 years" (verified from the live NSFDC scheme page). Quarterly
+# cadence applies automatically to this scheme; everything else stays monthly.
+QUARTERLY_SCHEME_IDS = frozenset({"nsfdc-mfs-001", "nsfdc_mfs_001", "nsfdcmfs001"})
+QUARTERLY_SCHEME_NAME_KEYWORDS = ("micro finance", "micro-finance")
+
+
+def resolve_payment_frequency(scheme_id: str, scheme_name: str = "") -> str:
+    """
+    Resolve the scheme-owned repayment cadence. Pure function — no I/O.
+
+    Returns "quarterly" for NSFDC's Micro Finance Scheme (matched by id or
+    name keyword), "monthly" for everything else.
+    """
+    sid = (scheme_id or "").lower().replace("-", "").replace("_", "").strip()
+    if sid and sid in {s.replace("-", "").replace("_", "") for s in QUARTERLY_SCHEME_IDS}:
+        return "quarterly"
+    name = (scheme_name or "").lower()
+    if any(kw in name for kw in QUARTERLY_SCHEME_NAME_KEYWORDS):
+        return "quarterly"
+    return "monthly"
+
+
 # ─── Core Engine ─────────────────────────────────────────────────────────────
 
 def calculate_emi(
@@ -88,6 +128,7 @@ def calculate_emi(
     tenure_years: Optional[float] = None,
     moratorium_months: Optional[int] = None,
     include_schedule: bool = False,
+    payment_frequency: Literal["monthly", "quarterly"] = "monthly",
 ) -> EmiBreakdown:
     """
     Calculate EMI with scheme-enforced caps.
@@ -105,6 +146,9 @@ def calculate_emi(
         tenure_years: Max tenure in years (None = no tenure cap)
         moratorium_months: Moratorium period in months (None = 0)
         include_schedule: Whether to include month-by-month amortization schedule
+        payment_frequency: Installment cadence. Scheme-owned for NSFDC schemes —
+            resolved via resolve_payment_frequency() (Micro Finance Scheme →
+            "quarterly"). Unknown/welfare schemes default to "monthly".
 
     Returns:
         EmiBreakdown with all calculated values and transparency info
@@ -157,35 +201,85 @@ def calculate_emi(
     else:
         effective_months = requested_months
 
-    # ── Step 3: Calculate r (monthly interest rate as decimal) ──
-    r = interest_rate_pct / 12 / 100
+    # ── Step 2.5: Resolve payment cadence ──
+    if payment_frequency not in ("monthly", "quarterly"):
+        raise ValueError(
+            f"payment_frequency must be 'monthly' or 'quarterly', got '{payment_frequency}'"
+        )
+    payment_frequency = payment_frequency.lower()
 
-    # ── Step 4: Calculate EMI ──
-    if r == 0:
-        # Zero interest = simple division
-        emi = effective_loan / effective_months
+    installments_per_year = 4 if payment_frequency == "quarterly" else 12
+    months_per_period = 3 if payment_frequency == "quarterly" else 1
+
+    if payment_frequency == "quarterly":
+        caps_applied.append(
+            "Quarterly repayment cadence applied: one installment every 3 months "
+            "(NSFDC Micro Finance Scheme officially repays in quarterly installments)"
+        )
+
+    # ── Step 3: Calculate periodic interest rate (decimal) ──
+    periodic_rate = interest_rate_pct / installments_per_year / 100
+    r = interest_rate_pct / 12 / 100  # monthly-equivalent, kept for backward compat
+
+    # ── Step 4: Number of installments ──
+    # Monthly: one installment per month. Quarterly: months rounded UP to
+    # whole quarters (a partial quarter still ends with a full installment).
+    n_installments = math.ceil(effective_months / months_per_period)
+
+    actual_moratorium = moratorium_months if moratorium_months is not None else 0
+    if payment_frequency == "quarterly":
+        # Moratorium rounded up to whole quarters — installments land on
+        # quarter boundaries only.
+        actual_moratorium = math.ceil(actual_moratorium / 3) * 3
+
+    # ── Step 5: Calculate installment amount ──
+    # Installment = P × r × (1+r)^n / ((1+r)^n − 1)   (r = periodic rate)
+    if periodic_rate == 0:
+        installment = effective_loan / n_installments
     else:
-        # EMI = P × r × (1+r)^n / ((1+r)^n − 1)
-        compound = (1 + r) ** effective_months
-        emi = effective_loan * r * compound / (compound - 1)
+        compound = (1 + periodic_rate) ** n_installments
+        installment = effective_loan * periodic_rate * compound / (compound - 1)
 
-    emi = round(emi, 2)
+    installment = round(installment, 2)
 
-    # ── Step 5: Totals ──
-    total_payment = round(emi * effective_months, 2)
+    # ── Step 6: Totals ──
+    total_payment = round(installment * n_installments, 2)
     total_interest = round(total_payment - effective_loan, 2)
 
-    # ── Step 6: Moratorium ──
-    actual_moratorium = moratorium_months if moratorium_months is not None else 0
-    first_emi_month = actual_moratorium + 1
-    total_duration = actual_moratorium + effective_months
+    # ── Step 7: Timing ──
+    first_emi_month = actual_moratorium + months_per_period
+    total_duration = actual_moratorium + n_installments * months_per_period
 
-    # ── Step 7: Amortization schedule (optional) ──
+    # ── Step 8: Assumption note — always explicit, never silent ──
+    if payment_frequency == "quarterly":
+        assumption_note = (
+            f"Repayment calculated on QUARTERLY cadence: {n_installments} quarterly "
+            f"installments at {interest_rate_pct}% p.a. compounded quarterly. "
+            "Interest does NOT accrue during the moratorium period — documented "
+            "assumption (source data does not specify either way). Matches NSFDC's "
+            "official Micro Finance Scheme repayment structure (repaid in quarterly "
+            "installments within 4 years)."
+        )
+    else:
+        assumption_note = (
+            "Interest does NOT accrue during the moratorium period — documented "
+            "assumption (source data does not specify either way). "
+            "Documented limitation: this schedule uses monthly installments with "
+            "monthly compounding. NSFDC's Micro Finance Scheme officially repays in "
+            "QUARTERLY installments within 4 years — that scheme is switched to "
+            "quarterly cadence automatically when selected; every other scheme here "
+            "is shown on monthly cadence."
+        )
+
+    # ── Step 9: Amortization schedule (optional) ──
     schedule: list[dict] = []
     if include_schedule:
         balance = effective_loan
-        for month_num in range(1, total_duration + 1):
-            if month_num <= actual_moratorium:
+        moratorium_periods = actual_moratorium // months_per_period
+        total_periods = moratorium_periods + n_installments
+        for period_num in range(1, total_periods + 1):
+            month_num = period_num * months_per_period
+            if period_num <= moratorium_periods:
                 # Moratorium period — no payment, no interest accrual (documented assumption)
                 schedule.append({
                     "month": month_num,
@@ -196,24 +290,24 @@ def calculate_emi(
                     "balance": round(balance, 2),
                 })
             else:
-                if r == 0:
+                if periodic_rate == 0:
                     interest_component = 0
-                    principal_component = emi
+                    principal_component = installment
                 else:
-                    interest_component = round(balance * r, 2)
-                    principal_component = round(emi - interest_component, 2)
+                    interest_component = round(balance * periodic_rate, 2)
+                    principal_component = round(installment - interest_component, 2)
 
                 balance = round(balance - principal_component, 2)
 
-                # Fix floating point on last month
-                if month_num == total_duration:
+                # Fix floating point on last period
+                if period_num == total_periods:
                     principal_component = round(principal_component + balance, 2)
                     balance = 0
 
                 schedule.append({
                     "month": month_num,
                     "type": "repayment",
-                    "emi": emi,
+                    "emi": installment,
                     "principal": principal_component,
                     "interest": interest_component,
                     "balance": max(balance, 0),
@@ -225,12 +319,16 @@ def calculate_emi(
         effective_tenure_months=effective_months,
         effective_interest_rate_annual=interest_rate_pct,
         effective_interest_rate_monthly=round(r, 8),
-        emi_amount=emi,
+        effective_interest_rate_periodic=round(periodic_rate, 8),
+        installments_per_year=installments_per_year,
+        payment_frequency=payment_frequency,
+        emi_amount=installment,
         total_payment=total_payment,
         total_interest=total_interest,
         moratorium_months=actual_moratorium,
         first_emi_month=first_emi_month,
         total_duration_months=total_duration,
         caps_applied=caps_applied,
+        assumption_note=assumption_note,
         schedule=schedule,
     )

@@ -100,7 +100,8 @@ cd backend
 python -m pytest -v
 ```
 
-39 tests across Modules 1, 2, and 3.
+92 tests across Modules 1–4 (includes the welfare-engine rule tests and the
+quarterly-installment EMI tests for NSFDC's Micro Finance Scheme).
 
 ---
 

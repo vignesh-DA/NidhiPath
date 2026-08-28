@@ -8,11 +8,18 @@ Test cases cover:
     - Moratorium shift (EMI starts at moratorium_months + 1)
     - Zero interest rate edge case
     - Amortization schedule generation
+    - Quarterly installment cadence (NSFDC Micro Finance Scheme) — golden values,
+      schedule structure, moratorium interaction, and the MANDATED disclosure
+      line on monthly-cadence results
 """
 
 import pytest
 import math
-from app.modules.module2_calculator.emi import calculate_emi, EmiBreakdown
+from app.modules.module2_calculator.emi import (
+    calculate_emi,
+    resolve_payment_frequency,
+    EmiBreakdown,
+)
 
 
 class TestEmiCalculator:
@@ -23,7 +30,7 @@ class TestEmiCalculator:
         # ₹1,00,000 at 6.5% for 36 months
         # Monthly rate r = 6.5/12/100 = 0.00541667
         # EMI = 100000 × 0.00541667 × (1.00541667)^36 / ((1.00541667)^36 - 1)
-        # Expected EMI ≈ ₹3,063.35
+        # Expected EMI ≈ ₹3,064.90
         result = calculate_emi(
             scheme_id="test",
             requested_amount=100000,
@@ -211,3 +218,141 @@ class TestEmiCalculator:
 
         assert result_high.emi_amount > result_low.emi_amount
         assert result_high.total_interest > result_low.total_interest
+
+
+class TestQuarterlyCadence:
+    """
+    NSFDC's Micro Finance Scheme repays in QUARTERLY installments — verified
+    directly from the live NSFDC scheme page ("repaid in quarterly instalments
+    within 4 years"). These tests pin the quarterly math and the mandatory
+    disclosure so the calculator can never silently fall back to monthly.
+    """
+
+    # Independent hand-check: P=₹1,00,000, 36 months, 6.5% p.a. →
+    # r_q = 6.5/4/100 = 0.01625, n = 12 quarterly installments
+    # EMI = 100000 × 0.01625 × (1.01625)^12 / ((1.01625)^12 − 1) = ₹9,239.54
+    GOLDEN_QUARTERLY_EMI = 9239.54
+
+    def test_resolver_maps_micro_finance_to_quarterly(self):
+        assert resolve_payment_frequency("nsfdc-mfs-001", "Micro Finance Scheme") == "quarterly"
+        assert resolve_payment_frequency("nsfdc_mfs_001") == "quarterly"
+        assert resolve_payment_frequency("", "Micro Finance Scheme") == "quarterly"
+        assert resolve_payment_frequency("", "NSFDC Micro-Finance Scheme") == "quarterly"
+
+    def test_resolver_maps_other_schemes_to_monthly(self):
+        assert resolve_payment_frequency("nsfdc-tl-002", "Term Loan Scheme") == "monthly"
+        assert resolve_payment_frequency("nsfdc-amy-003", "Aajeevika Scheme") == "monthly"
+        assert resolve_payment_frequency("nsfdc-uny-004", "Udyam Nidhi") == "monthly"
+        assert resolve_payment_frequency("nsfdc-edu-005", "Education Loan Scheme") == "monthly"
+        assert resolve_payment_frequency("", "") == "monthly"
+        assert resolve_payment_frequency("some-welfare-scheme") == "monthly"
+
+    def test_quarterly_golden_value(self):
+        result = calculate_emi(
+            scheme_id="nsfdc-mfs-001",
+            requested_amount=100000,
+            requested_months=36,
+            interest_rate_pct=6.5,
+            max_loan_amount=140000,
+            project_cost=120000,
+            payment_frequency="quarterly",
+        )
+        assert isinstance(result, EmiBreakdown)
+        assert result.payment_frequency == "quarterly"
+        assert result.installments_per_year == 4
+        assert result.effective_interest_rate_periodic == pytest.approx(6.5 / 4 / 100, abs=1e-8)
+        assert result.effective_tenure_months == 36
+        assert abs(result.emi_amount - self.GOLDEN_QUARTERLY_EMI) < 0.01
+        assert result.total_payment == round(result.emi_amount * 12, 2)
+        assert abs(result.total_interest - 10874.48) < 0.05
+        # No moratorium → first quarterly installment lands at end of quarter 1
+        assert result.first_emi_month == 3
+        assert result.total_duration_months == 36
+
+    def test_quarterly_costs_more_than_monthly_times_three(self):
+        """Same loan, same annual rate: one quarterly installment must EXCEED
+        3× the monthly EMI — compounding over a full quarter costs more than
+        monthly compounding. This is why cadence is financially material,
+        not cosmetic."""
+        monthly = calculate_emi(
+            scheme_id="test", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+            payment_frequency="monthly",
+        )
+        quarterly = calculate_emi(
+            scheme_id="test", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+            payment_frequency="quarterly",
+        )
+        assert quarterly.emi_amount > monthly.emi_amount * 3
+        assert quarterly.total_interest > monthly.total_interest
+
+    def test_quarterly_schedule_structure(self):
+        result = calculate_emi(
+            scheme_id="nsfdc-mfs-001", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+            include_schedule=True, payment_frequency="quarterly",
+        )
+        repayment = [s for s in result.schedule if s["type"] == "repayment"]
+        assert len(repayment) == 12
+        assert [s["month"] for s in repayment] == [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36]
+        assert all(abs(s["emi"] - self.GOLDEN_QUARTERLY_EMI) < 0.01 for s in repayment)
+        assert result.schedule[-1]["balance"] == 0
+
+    def test_quarterly_with_moratorium(self):
+        """6-month moratorium + 36-month tenure → 2 moratorium quarters, first
+        installment at month 9, 42 months total."""
+        result = calculate_emi(
+            scheme_id="nsfdc-mfs-001", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+            moratorium_months=6, include_schedule=True, payment_frequency="quarterly",
+        )
+        assert result.first_emi_month == 9
+        assert result.total_duration_months == 42
+        moratorium_rows = [s for s in result.schedule if s["type"] == "moratorium"]
+        repayment_rows = [s for s in result.schedule if s["type"] == "repayment"]
+        assert [s["month"] for s in moratorium_rows] == [3, 6]
+        assert repayment_rows[0]["month"] == 9
+        assert len(repayment_rows) == 12
+        assert result.schedule[-1]["balance"] == 0
+
+    def test_monthly_note_discloses_quarterly_limitation(self):
+        """MANDATED: monthly-cadence results must explicitly say NSFDC's Micro
+        Finance Scheme officially uses quarterly installments. Silence on this
+        is the one outcome to avoid."""
+        result = calculate_emi(
+            scheme_id="test", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=200000,
+            payment_frequency="monthly",
+        )
+        note = result.assumption_note.lower()
+        assert "quarterly" in note
+        assert "micro finance" in note
+        assert "documented limitation" in note
+
+    def test_quarterly_note_states_cadence(self):
+        result = calculate_emi(
+            scheme_id="nsfdc-mfs-001", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+            payment_frequency="quarterly",
+        )
+        note = result.assumption_note.lower()
+        assert "quarterly" in note
+        assert "micro finance scheme" in note
+        assert "moratorium" in note  # moratorium assumption still present
+
+    def test_quarterly_caps_note_transparent(self):
+        result = calculate_emi(
+            scheme_id="nsfdc-mfs-001", requested_amount=100000, requested_months=36,
+            interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+            payment_frequency="quarterly",
+        )
+        assert any("quarterly" in c.lower() for c in result.caps_applied)
+
+    def test_invalid_frequency_raises(self):
+        with pytest.raises(ValueError):
+            calculate_emi(
+                scheme_id="test", requested_amount=100000, requested_months=36,
+                interest_rate_pct=6.5, max_loan_amount=140000, project_cost=120000,
+                payment_frequency="weekly",
+            )
