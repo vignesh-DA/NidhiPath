@@ -221,6 +221,13 @@ export interface UserLocation {
   lat?: number;
   lon?: number;
   source: LocationSource;
+  /**
+   * Epoch ms when this value was resolved. Drives the 30-minute TTL for
+   * geolocation-sourced values (manual overrides ignore it — they persist for
+   * the session; intake values are always re-checkable regardless). Legacy
+   * cache entries without this field are treated as stale.
+   */
+  resolvedAt?: number;
 }
 
 // ─── App State ──────────────────────────────────────────────────────────────

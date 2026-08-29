@@ -32,6 +32,7 @@ These items are real production requirements. None of them block a working demo,
 | 12 | **Rate Limiting** | API rate limiting to prevent abuse, especially on LLM endpoints. | ❌ Not implemented |
 | 13 | **Logging & Audit** | Structured logging with request tracing. Audit trail for all eligibility decisions. | ❌ Basic only |
 | 14 | **Load Testing** | Verify performance under concurrent users, especially Module 4 LLM calls. | ❌ Not tested |
+| 15 | **React Hooks Lint Debt** | 3 `react-hooks/set-state-in-effect` errors in `locator/page.tsx` (sessionStorage hydration via setState inside effects). Analyzed as cosmetic: one extra render pass on mount; no path feeds a stale value into the partner-fetch effect, which early-returns on every not-ready combination. Proper fix = hydration refactor (lazy `useState` initializers guarded for SSR, or `useSyncExternalStore`). | ⚠️ Deferred — cosmetic, tracked |
 
 ---
 
@@ -70,3 +71,18 @@ These items are real production requirements. None of them block a working demo,
 - Absent from IFSC.csv entirely
 - Will always resolve to a single HQ pin, never real branch-level proximity
 - Must be disclosed in UI (currently implemented)
+
+### Lint Debt Note (live-checked 2026-08-29)
+
+> `npm run lint` reports exactly 3 `react-hooks/set-state-in-effect` errors in
+> `frontend/app/locator/page.tsx`. Verified identical on the pre-location-fix
+> HEAD (old lines 52/156/166 = new 96/281/291) — the location-resolution
+> rewrite preserved the existing hydration pattern rather than adding errors.
+> Judged **cosmetic, not state-timing-relevant**: the rule fires on mount-time
+> hydration from sessionStorage (scheme, location) and one loading flag. The
+> downstream partner-fetch effect guards every not-ready combination
+> (`!scheme`, `locationLoading`, `!location`) with early returns, so it can
+> never act on a half-updated value; the original stale-location bug was a
+> precedence/logic bug, unrelated to this rule. Deferred deliberately — do NOT
+> eslint-disable them in the meantime; the visible count of 3 is what makes a
+> regression loud.

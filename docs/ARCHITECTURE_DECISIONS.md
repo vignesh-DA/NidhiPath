@@ -113,3 +113,55 @@ avoided.
 **Tests:** `test_emi.py::TestQuarterlyCadence` — golden value ₹9,239.54 pinned,
 quarterly-vs-monthly materiality, schedule structure, moratorium interaction,
 and the mandated disclosure line on monthly-cadence results.
+
+---
+
+## AD-12: Location Resolution Precedence, 30-Minute TTL, and Fallback Ranking
+
+**Decision:** `useLocationResolution()` in `frontend/app/locator/page.tsx`
+resolves the user's state through a strict precedence chain:
+
+1. Cache hit with `source: "manual"` -> used, no TTL (explicit user choice).
+2. Cache hit with `source: "geolocation"` younger than 30 minutes -> used; no
+   geolocation call, no Nominatim call.
+3. Otherwise -> `navigator.geolocation` is always attempted. On success the
+   reading is cached with `resolvedAt` and used. On failure the error code and
+   browser message are logged, then the fallback chain applies: stale
+   geolocation reading -> intake form state (cached as `source: "intake"`) ->
+   manual state picker. Whichever fallback is applied is announced in the UI
+   with its reason (`locationFallbackReason`). Intake values never
+   short-circuit a geolocation attempt on later visits.
+
+**Why 30 minutes:** a user's state does not change during a loan research
+session; sessionStorage dies on tab close, so this is within-session freshness
+only; ~2 Nominatim calls/hour/user stays well inside the usage policy ("max 1
+request per second, no heavy use"); and a revisit after expiry gets a fresh,
+correct reading instead of a stuck one.
+
+**Why a stale GPS reading outranks the intake form on failure** (decided
+explicitly in post-approval review; the branch only arises when the reading is
+30+ minutes old AND a fresh attempt failed):
+
+- Consistency: this decision already ranks fresh GPS above the declared state
+  (step 2); the same reading should not lose to the form merely because a
+  retry failed.
+- Geolocation failures are common and transient (a 5 s timeout is routine on
+  desktops without GPS). Letting the form supersede a good reading on any blip
+  would reintroduce the original bug in reverse: a real Chennai reading
+  flipped to a possibly-typo'd form state.
+- Mid-session inter-state travel is a near-zero probability; both candidates
+  are within-session facts, and the GPS one is mechanically measured.
+- The cost of a wrong guess is low and visible: the fallback reason (with the
+  reading's age) is shown in the Location Bar and the manual picker, one tap
+  from "Change Location".
+
+**Falsifier (flip the precedence if):** `user_state` ever changes meaning from
+"where the applicant is" to "where the project will be executed". The declared
+state then becomes the eligibility-relevant fact (SCA/RRB filtering) and must
+outrank any GPS reading; GPS would be demoted to proximity ranking only.
+
+**Tests:** manual protocol in `docs/LOCATOR_MANUAL_VERIFICATION.md` (browser
+permission prompts and TTL expiry cannot be exercised by the automated
+checks). Scenario 8 there is the direct regression test for the original
+stale-cache bug (a legacy cache entry without `resolvedAt` must not
+short-circuit).

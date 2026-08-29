@@ -276,15 +276,7 @@
     "partner_name": "Punjab & Sind Bank",
     "partner_type": "PSB",
     "state": "",
-    "address_raw": "Priority Sector Advance Department",
-    "pincode": ""
-  },
-  {
-    "partner_id": "PSB_05",
-    "partner_name": "th Floor",
-    "partner_type": "PSB",
-    "state": "",
-    "address_raw": "21 Rajendra Place, New Delhi – 110 008",
+    "address_raw": "Priority Sector Advance Department, 21 Rajendra Place, New Delhi – 110 008",
     "pincode": "110008"
   },
   {
@@ -318,14 +310,6 @@
     "state": "",
     "address_raw": "Baroda Bhavan",
     "pincode": ""
-  },
-  {
-    "partner_id": "PSB_07",
-    "partner_name": "th Floor",
-    "partner_type": "PSB",
-    "state": "",
-    "address_raw": "R.C. Dutt Road, Vadodara – 390 007 (Gujarat)",
-    "pincode": "390007"
   },
   {
     "partner_id": "PSB_04",

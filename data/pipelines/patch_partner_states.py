@@ -3,7 +3,10 @@ Data Pipeline: Patch partner states in channel_partners.json
 
 1. Extract state from RRB names (e.g., "Bihar Gramin Bank" → "Bihar")
 2. Normalize SCA state values (fix \\n artifacts, match canonical INDIAN_STATES)
-3. Write patched data back to data/staging/channel_partners.json
+3. Remove phantom "th Floor" records (PDF multi-line address artifacts) using
+   an explicit denylist; merge PSB_05's continuation address/pincode into the
+   kept record before removal
+4. Write patched data back to data/staging/channel_partners.json
 
 Run: python data/pipelines/patch_partner_states.py
 """
@@ -67,12 +70,77 @@ SCA_STATE_FIXES: dict[str, str] = {
 }
 
 
+# ─── Phantom Record Cleanup (PDF parsing artifacts) ─────────────────────────
+# Multi-line addresses in the source PDF were split into separate records whose
+# partner_name is the line fragment "th Floor" (from "4th Floor" / "7th Floor").
+# Cleanup uses an EXPLICIT DENYLIST, not a length heuristic — a length rule
+# (e.g. name < 10 chars) would also hit legitimate short-named partners such
+# as "UCO Bank" (PSB_11) and "Sakar-II" (CooperativeBank_109).
+
+PHANTOM_RECORDS: set[tuple[str, str]] = {
+    ("PSB_05", "th Floor"),  # continuation of Punjab & Sind Bank's address
+    ("PSB_07", "th Floor"),  # Vadodara fragment; the kept PSB_07 record (Indian
+    #                          Bank Corporate Office, Chennai) is already complete
+}
+
+# Phantom records whose address/pincode continue the kept record's address and
+# must therefore be merged into it before removal.
+PHANTOM_MERGE_INTO_KEPT: set[str] = {"PSB_05"}
+
+
+def dedupe_phantom_records(partners: list[dict]) -> tuple[list[dict], dict]:
+    """Remove phantom "th Floor" records; merge PSB_05's continuation address.
+
+    Returns (cleaned_list, stats). Idempotent: re-running on already-clean
+    data removes nothing and merges nothing.
+    """
+    stats = {"phantoms_removed": 0, "phantoms_merged": 0}
+
+    def is_phantom(p: dict) -> bool:
+        return (p.get("partner_id", ""), p.get("partner_name", "")) in PHANTOM_RECORDS
+
+    # Index legitimate records by partner_id so phantom fragments can merge in.
+    kept_by_id: dict[str, dict] = {
+        p.get("partner_id", ""): p for p in partners if not is_phantom(p)
+    }
+
+    for partner in partners:
+        if not is_phantom(partner):
+            continue
+        stats["phantoms_removed"] += 1
+        pid = partner.get("partner_id", "")
+        kept = kept_by_id.get(pid)
+        if kept is None or pid not in PHANTOM_MERGE_INTO_KEPT:
+            continue
+        phantom_addr = partner.get("address_raw", "").strip()
+        kept_addr = kept.get("address_raw", "").strip()
+        if phantom_addr and phantom_addr not in kept_addr:
+            kept["address_raw"] = (
+                f"{kept_addr}, {phantom_addr}" if kept_addr else phantom_addr
+            )
+            stats["phantoms_merged"] += 1
+        phantom_pin = partner.get("pincode", "").strip()
+        if phantom_pin and not kept.get("pincode", "").strip():
+            kept["pincode"] = phantom_pin
+
+    cleaned = [p for p in partners if not is_phantom(p)]
+    return cleaned, stats
+
+
 def patch_partners(input_path: Path) -> tuple[list[dict], dict]:
     """Patch partner records. Returns (patched_list, stats)."""
     with open(input_path, "r", encoding="utf-8") as f:
         partners = json.load(f)
 
-    stats = {"rrb_patched": 0, "sca_normalized": 0, "total": len(partners)}
+    # ── Phantom cleanup first, so the state-patching loop never sees them ──
+    partners, phantom_stats = dedupe_phantom_records(partners)
+
+    stats = {
+        "rrb_patched": 0,
+        "sca_normalized": 0,
+        "total": len(partners),
+        **phantom_stats,
+    }
 
     for partner in partners:
         ptype = partner.get("partner_type", "").strip()
@@ -114,6 +182,10 @@ def main():
         json.dump(patched, f, indent=2, ensure_ascii=False)
 
     print(f"[OK] Patched {stats['rrb_patched']} RRB states, normalized {stats['sca_normalized']} SCA states")
+    print(
+        f"[OK] Removed {stats['phantoms_removed']} phantom records, "
+        f"merged {stats['phantoms_merged']} continuation address(es)"
+    )
     print(f"   Total partners: {stats['total']}")
     print(f"[WRITE] Written to: {input_path}")
 

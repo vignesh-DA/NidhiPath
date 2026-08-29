@@ -33,77 +33,199 @@ async function reverseGeocode(
       addr.state_district || addr.county || addr.city_district || null;
     if (!state) return null;
     return { state, district: district || undefined };
-  } catch {
+  } catch (e) {
+    console.warn(
+      `[locator] reverse geocode request failed for lat=${lat}, lon=${lon}:`,
+      e
+    );
     return null;
   }
 }
 
-// ─── Location Resolution Hook ───────────────────────────────────────────────
+// ─── Location Cache TTL (approved decision) ─────────────────────────────────
+// Successful geolocation results are cached for 30 minutes. Manual overrides
+// persist for the full session (no TTL). The intake fallback is always
+// re-checkable — it never blocks a geolocation re-attempt.
+// Why 30 min: a user's state doesn't change during a loan research session;
+// sessionStorage dies on tab close (within-session freshness only); and ~2
+// Nominatim calls/hour/user stays well inside its "max 1 request per second,
+// no heavy use" usage policy.
+const LOCATION_TTL_MS = 30 * 60 * 1000;
+
+// GeolocationPositionError.code → human-readable failure reason
+const GEO_ERROR_REASONS: Record<number, string> = {
+  1: "permission denied",
+  2: "position unavailable",
+  3: "timed out",
+};
+
+function geoErrorReason(err: GeolocationPositionError): string {
+  return GEO_ERROR_REASONS[err.code] ?? `unknown error (code ${err.code})`;
+}
 
 function useLocationResolution() {
   const [location, setLocation] = useState<UserLocation | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationFallbackReason, setLocationFallbackReason] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
-    // Check if location was already resolved in session
-    const cached = sessionStorage.getItem("nidhipath_location");
-    if (cached) {
-      setLocation(JSON.parse(cached));
-      setLocationLoading(false);
-      return;
+    // ── Step 1: cache check — only certain sources may short-circuit. ─────
+    // Approved precedence: manual → use it, no TTL. Geolocation < 30 min old
+    // → use it. Anything else (stale geolocation, intake fallback) is held
+    // only as a failure fallback; geolocation is re-attempted either way.
+    let staleFallback: UserLocation | null = null;
+    let staleFallbackAgeMin: number | null = null;
+
+    const cachedRaw = sessionStorage.getItem("nidhipath_location");
+    if (cachedRaw) {
+      try {
+        const cached = JSON.parse(cachedRaw) as UserLocation;
+        const ageMs =
+          typeof cached.resolvedAt === "number"
+            ? Date.now() - cached.resolvedAt
+            : Infinity; // legacy entry without resolvedAt → treat as stale
+        if (cached.source === "manual") {
+          console.info(
+            `[locator] cache hit (manual override, no TTL): ${cached.state}`
+          );
+          setLocation(cached);
+          setLocationLoading(false);
+          return;
+        }
+        if (cached.source === "geolocation" && ageMs < LOCATION_TTL_MS) {
+          const ageMin = Math.max(0, Math.round(ageMs / 60000));
+          console.info(
+            `[locator] cache hit (geolocation, ${ageMin} min old < 30 min TTL): ${cached.state}`
+          );
+          setLocation(cached);
+          setLocationLoading(false);
+          return;
+        }
+        // Not authoritative — remember as fallback, but re-attempt geolocation.
+        staleFallback = cached;
+        if (Number.isFinite(ageMs)) {
+          staleFallbackAgeMin = Math.max(0, Math.round(ageMs / 60000));
+        }
+        console.info(
+          `[locator] cache not authoritative (source=${cached.source}, ` +
+            `${
+              staleFallbackAgeMin === null
+                ? "no timestamp"
+                : `${staleFallbackAgeMin} min old`
+            }) — re-attempting geolocation`
+        );
+      } catch (e) {
+        console.warn("[locator] corrupt location cache — discarding:", e);
+        sessionStorage.removeItem("nidhipath_location");
+      }
     }
 
-    // Try browser geolocation
+    // ── Step 2: attempt browser geolocation (unless manual/TTL hit above) ──
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
-          const result = await reverseGeocode(
-            pos.coords.latitude,
-            pos.coords.longitude
+          const { latitude, longitude } = pos.coords;
+          console.info(
+            `[locator] geolocation success: lat=${latitude.toFixed(5)}, lon=${longitude.toFixed(5)}`
           );
+          const result = await reverseGeocode(latitude, longitude);
           if (result) {
+            console.info(
+              `[locator] reverse geocode OK: state=${result.state}${
+                result.district ? `, district=${result.district}` : ""
+              }`
+            );
             const loc: UserLocation = {
               state: result.state,
               district: result.district,
-              lat: pos.coords.latitude,
-              lon: pos.coords.longitude,
+              lat: latitude,
+              lon: longitude,
               source: "geolocation",
+              resolvedAt: Date.now(),
             };
             sessionStorage.setItem("nidhipath_location", JSON.stringify(loc));
             setLocation(loc);
+            setLocationFallbackReason(null);
           } else {
-            // Geolocation succeeded but reverse-geocode failed — fall back to intake
-            fallbackToIntake();
+            console.warn(
+              `[locator] reverse geocode returned null for lat=${latitude}, lon=${longitude}`
+            );
+            fallbackOnFailure("Could not map your coordinates to a state");
           }
           setLocationLoading(false);
         },
-        () => {
-          // User denied or error — fall back to intake
-          fallbackToIntake();
+        (err: GeolocationPositionError) => {
+          const reason = geoErrorReason(err);
+          console.error(
+            `[locator] geolocation failed: ${reason} — ${err.message}`
+          );
+          fallbackOnFailure(`Location detection failed (${reason})`);
           setLocationLoading(false);
         },
         { timeout: 5000, maximumAge: 300000 }
       );
     } else {
-      fallbackToIntake();
+      console.warn(
+        "[locator] browser does not support geolocation — falling back"
+      );
+      fallbackOnFailure("Your browser does not support location detection");
       setLocationLoading(false);
     }
 
-    function fallbackToIntake() {
-      const intake = sessionStorage.getItem("nidhipath_intake");
-      if (intake) {
-        const parsed = JSON.parse(intake);
-        if (parsed.user_state) {
-          const loc: UserLocation = {
-            state: parsed.user_state,
-            source: "intake",
-          };
-          sessionStorage.setItem("nidhipath_location", JSON.stringify(loc));
-          setLocation(loc);
-          return;
+    // ── Step 3: fallback chain on geolocation failure ─────────────────────
+    // Priority: last known geolocation reading → intake state → manual picker.
+    // DECIDED explicitly in post-approval review (recorded as AD-12): stale
+    // GPS deliberately outranks the intake form. The TTL policy already ranks
+    // fresh GPS above the declared state, and letting a form value supersede
+    // a good reading on any transient failure (5 s timeouts are routine on
+    // desktops) would resurrect the original bug in reverse. A wrong guess is
+    // visible here (fallback reason with reading age) and one tap from
+    // correction. FLIP this precedence if user_state ever means "project
+    // location" rather than "applicant location" — the declared state then
+    // becomes the eligibility-relevant fact and must outrank GPS.
+    // Intake values are cached as source "intake", which never short-circuits
+    // a geolocation attempt on the next page load.
+    function fallbackOnFailure(detail: string) {
+      if (staleFallback?.source === "geolocation") {
+        const age =
+          staleFallbackAgeMin !== null ? ` (${staleFallbackAgeMin} min ago)` : "";
+        setLocation(staleFallback);
+        setLocationFallbackReason(
+          `${detail} — showing your last detected location: ${staleFallback.state}${age}`
+        );
+        return;
+      }
+      if (staleFallback?.source === "intake") {
+        setLocation(staleFallback);
+        setLocationFallbackReason(
+          `${detail} — using ${staleFallback.state} from your intake form`
+        );
+        return;
+      }
+      const intakeRaw = sessionStorage.getItem("nidhipath_intake");
+      if (intakeRaw) {
+        try {
+          const parsed = JSON.parse(intakeRaw);
+          if (parsed.user_state) {
+            const loc: UserLocation = {
+              state: parsed.user_state,
+              source: "intake",
+            };
+            sessionStorage.setItem("nidhipath_location", JSON.stringify(loc));
+            setLocation(loc);
+            setLocationFallbackReason(
+              `${detail} — using ${loc.state} from your intake form`
+            );
+            return;
+          }
+        } catch (e) {
+          console.warn("[locator] corrupt intake cache:", e);
         }
       }
+      // Nothing usable — surface the manual state picker.
       setLocationError("no_location");
     }
   }, []);
@@ -114,15 +236,23 @@ function useLocationResolution() {
         state,
         district: district || undefined,
         source: "manual" as LocationSource,
+        resolvedAt: Date.now(),
       };
       sessionStorage.setItem("nidhipath_location", JSON.stringify(loc));
       setLocation(loc);
       setLocationError(null);
+      setLocationFallbackReason(null);
     },
     []
   );
 
-  return { location, locationLoading, locationError, setManualLocation };
+  return {
+    location,
+    locationLoading,
+    locationError,
+    locationFallbackReason,
+    setManualLocation,
+  };
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────
@@ -143,6 +273,7 @@ export default function LocatorPage() {
     location,
     locationLoading,
     locationError,
+    locationFallbackReason,
     setManualLocation,
   } = useLocationResolution();
 
@@ -275,7 +406,9 @@ export default function LocatorPage() {
       case "intake":
         return {
           icon: "📋",
-          text: `From your intake: ${location.state}`,
+          text: locationFallbackReason
+            ? `Fallback — from your intake: ${location.state}`
+            : `From your intake: ${location.state}`,
           color: "text-[#1D4ED8]",
           bg: "bg-[#EFF6FF]",
           border: "border-[#BFDBFE]",
@@ -314,6 +447,13 @@ export default function LocatorPage() {
             We need your state to filter partners to your region. National banks
             (PSBs) are shown regardless.
           </p>
+
+          {locationFallbackReason && (
+            <p className="text-xs text-[#92400E] bg-[#FFFBEB] border border-[#FDE68A] rounded-xl p-3 mb-4 leading-relaxed text-left flex items-start gap-1.5">
+              <span aria-hidden>⚠️</span>
+              <span>{locationFallbackReason}</span>
+            </p>
+          )}
 
           <select
             id="location-state-picker"
@@ -526,6 +666,12 @@ export default function LocatorPage() {
               </svg>
               Change Location
             </button>
+            {locationFallbackReason && (
+              <p className="basis-full flex items-start gap-1.5 text-xs font-medium text-[#92400E] leading-relaxed">
+                <span aria-hidden>⚠️</span>
+                <span>{locationFallbackReason}</span>
+              </p>
+            )}
           </div>
         )}
 
