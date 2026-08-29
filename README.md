@@ -10,10 +10,10 @@ for Scheduled Caste beneficiaries — built for the
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-REST%20API-009688?logo=fastapi&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-App%20Router-000000?logo=nextdotjs&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16%20App%20Router-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-Postgres-3FCF8E?logo=supabase&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-92%20passing-16A34A)
+![Tests](https://img.shields.io/badge/pytest-100%20passing-16A34A)
 
 </div>
 
@@ -37,7 +37,7 @@ with **auditable, deterministic logic** wherever money or eligibility is involve
 ## Design Principles
 
 These are architectural commitments, not aspirations (rationale in
-[docs/ARCHITECTURE_DECISIONS.md](docs/ARCHITECTURE_DECISIONS.md), AD-1 through AD-11):
+[docs/ARCHITECTURE_DECISIONS.md](docs/ARCHITECTURE_DECISIONS.md), AD-1 through AD-12):
 
 | # | Principle | In practice |
 |---|-----------|-------------|
@@ -52,7 +52,7 @@ These are architectural commitments, not aspirations (rationale in
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    Next.js 14 (App Router)                   │
+│                    Next.js 16 (App Router)                   │
 │   /intake → /recommendation → /calculator → /locator         │
 │   /qa (scheme-scoped RAG chat)          i18n: en · hi        │
 └─────────────────────────────┬────────────────────────────────┘
@@ -69,7 +69,7 @@ These are architectural commitments, not aspirations (rationale in
           ▼              ▼              ▼             ▼
     data/staging    scheme-owned    partners +    chunk index +
     382 schemes     params (rate,   IFSC ref.     Groq gpt-oss-120b
-    (5 credit +     caps, cadence)  92 records    (Module 4 only)
+    (5 credit +     caps, cadence)  90 records    (Module 4 only)
     377 welfare)
 ```
 
@@ -84,7 +84,7 @@ never a dependency of it.
 |--------|--------------|:---:|---------------|
 | **1 · Scheme Recommender** | Matches a user profile (income, state, caste, project type, education status) against 5 NSFDC credit schemes (primary tier) and 377 welfare schemes (secondary tier) | ❌ None | Ranked matches with per-match reasons; tiers never merged; income cap enforced |
 | **2 · Financial Calculator** | EMI / quarterly installment calculation with scheme-enforced caps, moratorium handling, and full amortization schedule | ❌ None | Interest rate is scheme-owned and never user-editable; every assumption disclosed in the response |
-| **3 · Partner Locator** | Shortlists authorized channel partners by state → scheme authorization → portfolio health → proximity | ❌ None | Deterministic filter pipeline; every step's outcome reported in the response |
+| **3 · Partner Locator** | Shortlists authorized channel partners via a 4-step pipeline: scheme capability → state eligibility → portfolio health → location-tier ranking (district / state / national) | ❌ None | Deterministic pipeline; every step's outcome, rank tier, and known gaps disclosed in the response |
 | **4 · AI Intake + Q&A** | Free-text → structured profile extraction (cost, income, project type) and scheme-scoped Q&A with cited sources | ✅ Groq | LLM output is validated and heuristic-backed; extractive fallback when LLM unavailable |
 
 ### Repayment cadence, handled correctly
@@ -107,7 +107,7 @@ All endpoints live under `/api/v1`. Interactive docs at
 |:---:|----------|---------|:---:|
 | `POST` | `/api/v1/recommend` | Two-tier scheme matching (NSFDC credit + welfare) from a structured profile | ❌ |
 | `POST` | `/api/v1/calculate-emi` | EMI with scheme-enforced caps, moratorium, quarterly/monthly cadence, optional amortization schedule | ❌ |
-| `POST` | `/api/v1/locate-partners` | Partner shortlist: state filter → scheme authorization → health filter → proximity | ❌ |
+| `POST` | `/api/v1/locate-partners` | Partner shortlist: capability → eligibility → health → location-tier ranking | ❌ |
 | `POST` | `/api/v1/intake/extract` | Free-text story → structured profile (cost, income, state, caste, project type) | ✅ |
 | `POST` | `/api/v1/qa` | Scheme-scoped Q&A with cited, section-level sources | ✅ |
 
@@ -168,8 +168,15 @@ Place these before starting the backend (see [data/](data/)):
 |------|:---:|------|
 | `data/staging/nsfdc_schemes.json` | 5 | Primary tier — NSFDC credit schemes (rate, caps, moratorium, cadence, `purpose` tags) |
 | `data/staging/schemes_production_deduped.json` | 377 | Secondary tier — state & central welfare schemes with structured income/caste/state criteria |
-| `data/staging/channel_partners.json` | 92 | Locator — SCA / PSB / RRB / NBFC-MFI partners |
+| `data/staging/channel_partners.json` | 90 | Locator — SCA / PSB / RRB / NBFC-MFI partners |
 | `data/reference/ifsc.csv` | 182K+ | Bank branch reference (keyed by IFSC prefix, not BANK column) |
+
+> **Data governance:** welfare-scheme records flagged `needs_review` (5 live) are served
+> intact with their flags — nothing suppressed, nothing silently "fixed". Data cleanup runs
+> are audited with before/after scripts rather than trusted — e.g.
+> `data/pipelines/validation/verify_phantom_dedup.py` prints the full record-level
+> diff for the phantom-artifact dedup. Rules: never edit `data/staging/` by hand;
+> patch scripts are idempotent and re-runnable.
 
 ---
 
@@ -193,7 +200,7 @@ NidhiPath/
 │       │   └── module4_rag/
 │       ├── db/                   # Session + migrations (Supabase / Postgres)
 │       └── translation/          # Batch translation pipeline (en → hi)
-├── frontend/                     # Next.js 14 App Router (TypeScript strict)
+├── frontend/                     # Next.js 16 App Router (TypeScript strict)
 │   ├── app/                      # intake · recommendation · calculator ·
 │   │                             # locator · qa · login
 │   ├── lib/                      # Typed API client + shared types
@@ -201,10 +208,12 @@ NidhiPath/
 ├── data/
 │   ├── staging/                  # Audited production JSON — do not edit manually
 │   ├── reference/                # IFSC CSV
-│   └── pipelines/                # Extraction pipeline outputs
+│   ├── pipelines/                # Extraction + patch scripts (re-runnable, idempotent)
+│   │   └── validation/           # Audit scripts (e.g. verify_phantom_dedup.py)
 ├── docs/
-│   ├── ARCHITECTURE_DECISIONS.md # AD-1 … AD-11, with rationale
-│   └── PRODUCTION_HARDENING.md   # Gap register + known data flags
+│   ├── ARCHITECTURE_DECISIONS.md # AD-1 … AD-12, each with rationale (+ falsifiers)
+│   ├── PRODUCTION_HARDENING.md   # Gap register + known data flags
+│   └── LOCATOR_MANUAL_VERIFICATION.md  # 9-scenario browser test protocol
 └── .env.example
 ```
 
@@ -218,7 +227,7 @@ python -m pytest -v          # full suite
 python -m pytest -q          # quiet
 ```
 
-**92 tests across Modules 1–4**, all passing. Highlights:
+**100 tests across Modules 1–4**, all passing. Highlights:
 
 - **Module 1** — credit-engine routing (`purpose` tags, income cap, cost coverage) and the
   welfare rule engine (state/central matching, income operators incl. boundary cases,
@@ -226,7 +235,8 @@ python -m pytest -q          # quiet
 - **Module 2** — golden-value EMI tests, cap/moratorium/tenure behavior, amortization
   schedule integrity, and the quarterly-installment suite for the Micro Finance Scheme
   (₹9,239.54 golden value + the mandated monthly-cadence disclosure line).
-- **Module 3** — pipeline stage disclosure and stub behavior contracts.
+- **Module 3** — pipeline stage disclosure and location-tier ranking contracts
+  (district / state / national ordering, `proximity_status` states, health deprioritization).
 - **Module 4** — chunking, sibling-chunk retrieval, heuristic fallback when the LLM is down.
 
 The welfare-engine tests double as the guard for the *no-RAG-for-eligibility* rule:
@@ -238,8 +248,9 @@ every eligibility assertion exercises a deterministic rule, never a similarity s
 
 | Doc | Contents |
 |-----|----------|
-| [docs/ARCHITECTURE_DECISIONS.md](docs/ARCHITECTURE_DECISIONS.md) | AD-1 … AD-11 — income cap (₹5,00,000 per problem statement), deterministic eligibility, sibling-chunk retrieval, quarterly cadence (AD-11), and more, each with rationale |
-| [docs/PRODUCTION_HARDENING.md](docs/PRODUCTION_HARDENING.md) | Gap register with live-checked status — what is production-ready, what is disclosed-stub, and which data flags are real vs historical |
+| [docs/ARCHITECTURE_DECISIONS.md](docs/ARCHITECTURE_DECISIONS.md) | AD-1 … AD-12 — income cap (₹5,00,000 per problem statement), deterministic eligibility, sibling-chunk retrieval, quarterly cadence (AD-11), and location precedence + TTL with an explicit falsifier clause (AD-12) |
+| [docs/PRODUCTION_HARDENING.md](docs/PRODUCTION_HARDENING.md) | Gap register with live-checked status — what is production-ready, what is disclosed-stub, which data flags are real vs historical, and tracked lint debt |
+| [docs/LOCATOR_MANUAL_VERIFICATION.md](docs/LOCATOR_MANUAL_VERIFICATION.md) | 9-scenario browser protocol for what automated checks can't reach: permission prompts, TTL expiry, and the legacy-cache regression test |
 
 ---
 
@@ -247,9 +258,11 @@ every eligibility assertion exercises a deterministic rule, never a similarity s
 
 Stated plainly, because a demo that hides its edges is worth less than one that knows them:
 
-- **Partner proximity ranking is a disclosed stub** — `rank_by_proximity()` returns partners
-  unsorted with `proximity_status: "unavailable"`. Real lat/long KNN ranking is blocked on
-  geocoding and deliberately built last (per the project's build order).
+- **Partner proximity ranking is tier-based, not true geo-distance** — `rank_by_proximity()`
+  ranks partners into disclosed tiers (district match → state match → national) and reports
+  `proximity_status: "tier_ranking"`; without a user state it reports `"unavailable"`. True
+  lat/long KNN (PostGIS `<->`) stays blocked on geocoding and is deliberately built last,
+  per the project's build order.
 - **Partner portfolio-health metrics are mocked** — every partner currently reports fixed
   NPA/utilization values; the filter pipeline is real, the data behind step 3 is not yet.
 - **5 welfare-scheme records carry live `needs_review` flags** and are still served with them
