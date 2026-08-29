@@ -51,7 +51,7 @@
     "partner_id": "RRB_01",
     "partner_name": "Bihar Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Bihar",
     "address_raw": "Shri Vishnu Commercial Complex, NH-30, New Bypass, Near Bp Highway Services Petrol Pump, Asochak, Patna - 800016",
     "pincode": "800016"
   },
@@ -59,7 +59,7 @@
     "partner_id": "RRB_03",
     "partner_name": "Jharkhand Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Jharkhand",
     "address_raw": "Zila Parishad Market Complex, 3rd Floor, Kutchery Road, Ranchi- 834001, Jharkhand.",
     "pincode": "834001"
   },
@@ -67,7 +67,7 @@
     "partner_id": "RRB_05",
     "partner_name": "Gujarat Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Gujarat",
     "address_raw": "Head Office, Sky Line Building, 2nd Floor, Near Shital Guest House, Bharuch - 392001, Gujarat.",
     "pincode": "392001"
   },
@@ -75,7 +75,7 @@
     "partner_id": "RRB_07",
     "partner_name": "Rajasthan Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Rajasthan",
     "address_raw": "Tulsi Tower, 9th B Road Sardarpura, Jodhpur – 342003 (Rajasthan)",
     "pincode": "342003"
   },
@@ -83,7 +83,7 @@
     "partner_id": "RRB_09",
     "partner_name": "Kerala Grameena Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Kerala",
     "address_raw": "PB No.10, KGpB Towers, AK Road, Uphill, Malappuram,Kerala – 676505.",
     "pincode": "676505"
   },
@@ -91,7 +91,7 @@
     "partner_id": "RRB_11",
     "partner_name": "Tripura Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Tripura",
     "address_raw": "H.O. Airport Road, PO Abhaynagar, Agartala, Tripura (W) Pin – 799 005.",
     "pincode": "799005"
   },
@@ -99,7 +99,7 @@
     "partner_id": "RRB_13",
     "partner_name": "Assam Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Assam",
     "address_raw": "HO, G.S. Road, Bhangagarh, Guwahati- 781 005.(Assam)",
     "pincode": "781005"
   },
@@ -107,7 +107,7 @@
     "partner_id": "RRB_15",
     "partner_name": "Punjab Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Punjab",
     "address_raw": "HO Jalandhar Road, Kapurthala – 144 601. (Punjab)",
     "pincode": "144601"
   },
@@ -115,7 +115,7 @@
     "partner_id": "RRB_17",
     "partner_name": "Madhaya Pradesh Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Madhya Pradesh",
     "address_raw": "C21, Business Park, C21 Square opposite Hotel Radisson Blue, MR-10 Indore- 452010, Madhaya Pradesh",
     "pincode": "452010"
   },
@@ -123,7 +123,7 @@
     "partner_id": "RRB_19",
     "partner_name": "Puducherry Grama Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Puducherry",
     "address_raw": "No.441, Mahatma Gandhi Road, Muthialpet, Puducherry – 605 003",
     "pincode": "605003"
   },
@@ -131,7 +131,7 @@
     "partner_id": "RRB_21",
     "partner_name": "Chhattisgarh Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Chhattisgarh",
     "address_raw": "Corporate Office Raipur, Plot No.-47, Sector-24, Atal Nagar, Nava Raipur-492013",
     "pincode": "492013"
   },
@@ -139,7 +139,7 @@
     "partner_id": "RRB_23",
     "partner_name": "Meghalaya Rural Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Meghalaya",
     "address_raw": "",
     "pincode": ""
   },
@@ -147,7 +147,7 @@
     "partner_id": "RRB_02",
     "partner_name": "Maharashtra Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Maharashtra",
     "address_raw": "Plot No.35, Jeewan Shri Town Centre, CIDCO, Aurangabad, Maharashtra – 431 003.",
     "pincode": "431003"
   },
@@ -155,7 +155,7 @@
     "partner_id": "RRB_04",
     "partner_name": "Haryana Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Haryana",
     "address_raw": "Near Bajrang Bhawan, Delhi Road, Rohtak, Haryana –124 001",
     "pincode": "124001"
   },
@@ -163,7 +163,7 @@
     "partner_id": "RRB_06",
     "partner_name": "Telangana Grameena Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Telangana",
     "address_raw": "2nd H.No.2-1-520, Floor, Vijaya Sri Sai Celestia, Street No.9, Shankermut Road, Nallakunta, Hyderabad, Telangana – 500044.",
     "pincode": "500044"
   },
@@ -171,7 +171,7 @@
     "partner_id": "RRB_08",
     "partner_name": "Uttar Pradesh Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Uttar Pradesh",
     "address_raw": "2nd & 3rd Floor, NBCC Commercial Complex, Vardan Khand, Gomti Nagar Extension, Lucknow–229001(Uttar Pradesh)",
     "pincode": "229001"
   },
@@ -179,7 +179,7 @@
     "partner_id": "RRB_10",
     "partner_name": "Uttarakhand Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Uttarakhand",
     "address_raw": "18-New Road, Dehradun, Uttarakhand.",
     "pincode": ""
   },
@@ -187,7 +187,7 @@
     "partner_id": "RRB_12",
     "partner_name": "Karnataka Grameena Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Karnataka",
     "address_raw": "Head Office, CA 20, Vijayanagar IInd Stage, Musure – 570017 (Karnataka)",
     "pincode": "570017"
   },
@@ -195,7 +195,7 @@
     "partner_id": "RRB_14",
     "partner_name": "Andhra Pradesh Grameena Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Andhra Pradesh",
     "address_raw": "4th Floor, Raghu Mansion, 4-1, Broadipet, Guntur -522 002 (Andhra Pradesh)",
     "pincode": "522002"
   },
@@ -203,7 +203,7 @@
     "partner_id": "RRB_16",
     "partner_name": "Tamil Nadu Grama Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Tamil Nadu",
     "address_raw": "6, Yercaud Road, Hasthasmpatti, Salem – 636007 (Tamil Nadu)",
     "pincode": "636007"
   },
@@ -211,7 +211,7 @@
     "partner_id": "RRB_18",
     "partner_name": "Himachal Pradesh Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Himachal Pradesh",
     "address_raw": "Jail Road (Panjethi), PO – Talyahar Mandi 175001 (Himachal Pradesh)",
     "pincode": "175001"
   },
@@ -219,7 +219,7 @@
     "partner_id": "RRB_20",
     "partner_name": "West Bengal Gramin Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "West Bengal",
     "address_raw": "Natabar Paul Road, Chatterjee Para More, Tikiapara, Howrah – 711101 (WB)",
     "pincode": "711101"
   },
@@ -227,7 +227,7 @@
     "partner_id": "RRB_22",
     "partner_name": "Manipur Rural Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Manipur",
     "address_raw": "Keishampat, Keisham Leikai, Imphal, Manipur 795001",
     "pincode": "795001"
   },
@@ -235,7 +235,7 @@
     "partner_id": "RRB_24",
     "partner_name": "J&K Grameen Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Jammu and Kashmir",
     "address_raw": "",
     "pincode": ""
   },
@@ -243,7 +243,7 @@
     "partner_id": "RRB_25",
     "partner_name": "Odisha Grameen Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Odisha",
     "address_raw": "Bhubaneswar. 7R25-H75, Jagamara, Sunderpada Road, Gandamuda, Pokhhariput, Bhubaneshwar -751030,Odisha",
     "pincode": "751030"
   },
@@ -251,7 +251,7 @@
     "partner_id": "RRB_26",
     "partner_name": "Mizoram Rural Bank",
     "partner_type": "RRB",
-    "state": "",
+    "state": "Mizoram",
     "address_raw": "Mizoram MINECO, Khatla Aizawl - 796001.",
     "pincode": "796001"
   },
@@ -483,7 +483,7 @@
     "partner_id": "SCA_07",
     "partner_name": "Dadra & Nagar Haveli, Daman & Diu SCs/STs/OBCs & Minorities Financial & Development Corporation (DNDSFDC)",
     "partner_type": "SCA",
-    "state": "Dadra & Nagar\nHaveli, Daman\n& Diu",
+    "state": "Dadra and Nagar Haveli and Daman and Diu",
     "address_raw": "Ground Floor, Right Wing, New Collectorate Building, Near Electricity Department, Opp. 66, KVA Sub- Station, 66 KVA Road, Silvassa – 396 230.",
     "pincode": "396230"
   },
@@ -531,7 +531,7 @@
     "partner_id": "SCA_13",
     "partner_name": "Himachal Pradesh SCs & STs Development Corporation (HPSCSTDC)",
     "partner_type": "SCA",
-    "state": "Himachal\nPradesh",
+    "state": "Himachal Pradesh",
     "address_raw": "Kalyan Bhawan, Near Ambusha Resort, Solan – 173212",
     "pincode": "173212"
   },
@@ -547,7 +547,7 @@
     "partner_id": "SCA_15",
     "partner_name": "J&K SCs, STs & OBCs Dev. Corpn. Ltd. (JKSCSTBCDC)",
     "partner_type": "SCA",
-    "state": "Jammu &\nKashmir",
+    "state": "Jammu and Kashmir",
     "address_raw": "Exchange Road, Near Red Cross Office, Srinagar – 190 001 (Office : May to October) & 135-A, Last Morh, Gandhi Nagar JAMMU -180 004 (Office : November to April)",
     "pincode": "190001"
   },

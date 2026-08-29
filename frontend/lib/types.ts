@@ -46,6 +46,7 @@ export interface SchemeSummary {
   interest_rate_beneficiary: number;
   max_loan_amount?: number;
   match_reason: string;
+  channel_partners: string[];  // Populated from scheme data — used by locator
 }
 
 export interface CreditRecommendationResult {
@@ -173,6 +174,7 @@ export interface QAResult {
 export interface LocateRequest {
   scheme_channel_partners: string[];
   user_state?: string;
+  user_district?: string;
   user_lat?: number;
   user_lon?: number;
 }
@@ -190,11 +192,14 @@ export interface Partner {
   partner_name: string;
   partner_type: string;
   state: string;
+  district?: string;
   contact?: string;
   address?: string;
   address_raw?: string;
   pincode?: string;
   health?: PartnerHealth;
+  rank_tier?: number;
+  location_label?: string;
 }
 
 export interface LocateResponse {
@@ -204,6 +209,18 @@ export interface LocateResponse {
   proximity_note: string;
   known_gaps: string[];
   total_results: number;
+}
+
+// ─── User Location (session state) ──────────────────────────────────────────
+
+export type LocationSource = "geolocation" | "intake" | "manual";
+
+export interface UserLocation {
+  state: string;
+  district?: string;
+  lat?: number;
+  lon?: number;
+  source: LocationSource;
 }
 
 // ─── App State ──────────────────────────────────────────────────────────────

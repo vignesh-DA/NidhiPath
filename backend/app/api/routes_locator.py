@@ -27,7 +27,11 @@ class LocateRequest(BaseModel):
     )
     user_state: Optional[str] = Field(
         None,
-        description="User's state for SCA eligibility filter",
+        description="User's state for SCA/RRB eligibility filter",
+    )
+    user_district: Optional[str] = Field(
+        None,
+        description="User's district for proximity tier ranking",
     )
     user_lat: Optional[float] = Field(None, description="User's latitude")
     user_lon: Optional[float] = Field(None, description="User's longitude")
@@ -71,8 +75,14 @@ async def locate_partners(request: LocateRequest):
     step3 = filter_by_health(step2)
     step3_count = len(step3)
 
-    # Step 4: Proximity ranking (stub)
-    result = rank_by_proximity(step3, request.user_lat, request.user_lon)
+    # Step 4: Proximity ranking (tier-based)
+    result = rank_by_proximity(
+        step3,
+        user_state=request.user_state,
+        user_district=request.user_district,
+        user_lat=request.user_lat,
+        user_lon=request.user_lon,
+    )
 
     return LocateResponse(
         partners=result["partners"],
@@ -95,6 +105,7 @@ async def locate_partners(request: LocateRequest):
             "step4_proximity": {
                 "input": step3_count,
                 "status": result["proximity_status"],
+                "ranking": result.get("ranking_summary", {}),
             },
         },
         proximity_status=result["proximity_status"],

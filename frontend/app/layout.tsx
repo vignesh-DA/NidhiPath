@@ -88,10 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   >
                     <option value="en">English</option>
                     <option value="hi">हिन्दी (Hindi)</option>
-                    <option value="ta">தமிழ் (Tamil)</option>
-                    <option value="te">తెలుగు (Telugu)</option>
-                    <option value="kn">ಕನ್ನಡ (Kannada)</option>
-                    <option value="ml">മലയാളം (Malayalam)</option>
+                    <option disabled>── More languages coming soon ──</option>
                   </select>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none -ml-3">
                     <polyline points="6 9 12 15 18 9" />

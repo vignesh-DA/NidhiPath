@@ -1,19 +1,20 @@
 """
 Module 3 — Eligibility Filter (Step 2 of 4)
 
-SCA → hard state match (partner.state = user.state).
+SCA/RRB → hard state match (partner.state = user.state).
     SCAs are state-bound by charter — no fuzzy proximity.
+    RRBs are named by state and operate regionally — same state logic applies.
 
-PSB/RRB/NBFC-MFI/Cooperative/SFB/Other → nationally eligible, no state constraint.
+PSB/NBFC-MFI/Cooperative/SFB/Other → nationally eligible, no state constraint.
 """
 
 from typing import Optional
 
 # Partner types that are state-bound
-STATE_BOUND_TYPES = {"SCA"}
+STATE_BOUND_TYPES = {"SCA", "RRB"}
 
 # Partner types that are nationally eligible
-NATIONAL_TYPES = {"PSB", "RRB", "NBFC-MFI", "COOPERATIVE", "SFB", "OTHER"}
+NATIONAL_TYPES = {"PSB", "NBFC-MFI", "COOPERATIVE", "SFB", "OTHER"}
 
 
 def filter_by_eligibility(

@@ -34,7 +34,7 @@ export default function RecommendationPage() {
       });
   }, [router]);
 
-  const handleSelectScheme = (scheme: MatchedScheme | { scheme_id: string; scheme_name: string; interest_rate_beneficiary: number; max_loan_amount?: number; match_reason: string }) => {
+  const handleSelectScheme = (scheme: MatchedScheme | { scheme_id: string; scheme_name: string; interest_rate_beneficiary: number; max_loan_amount?: number; match_reason: string; channel_partners?: string[] }) => {
     const fullScheme: MatchedScheme = "project_cost_coverage_pct" in scheme
       ? (scheme as MatchedScheme)
       : {
@@ -49,7 +49,7 @@ export default function RecommendationPage() {
           project_cost_coverage_pct: 90,
           tenure_years: 5,
           moratorium_months: 3,
-          channel_partners: ["SCA", "PSB", "RRB", "NBFC-MFI"],
+          channel_partners: scheme.channel_partners ?? [],  // Use real data; [] is safe — never wrong hardcode
           max_annual_income: 500000,
           raw: {},
         };
@@ -57,7 +57,7 @@ export default function RecommendationPage() {
     router.push("/calculator");
   };
 
-  const handleLocatePartners = (scheme: MatchedScheme | { scheme_id: string; scheme_name: string; interest_rate_beneficiary: number; max_loan_amount?: number; match_reason: string }) => {
+  const handleLocatePartners = (scheme: MatchedScheme | { scheme_id: string; scheme_name: string; interest_rate_beneficiary: number; max_loan_amount?: number; match_reason: string; channel_partners?: string[] }) => {
     const fullScheme: MatchedScheme = "channel_partners" in scheme
       ? (scheme as MatchedScheme)
       : {
@@ -72,7 +72,7 @@ export default function RecommendationPage() {
           project_cost_coverage_pct: 90,
           tenure_years: 5,
           moratorium_months: 3,
-          channel_partners: ["SCA", "PSB", "RRB", "NBFC-MFI"],
+          channel_partners: scheme.channel_partners ?? [],  // Use real data; [] is safe — never wrong hardcode
           max_annual_income: 500000,
           raw: {},
         };

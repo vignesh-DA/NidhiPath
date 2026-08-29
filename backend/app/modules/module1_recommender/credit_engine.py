@@ -80,6 +80,7 @@ class SchemeSummary(BaseModel):
     interest_rate_beneficiary: float
     max_loan_amount: Optional[float] = None
     match_reason: str
+    channel_partners: list[str] = []  # Needed by Module 3 locator — always forward from scheme data
 
 
 class CreditRecommendationResult(BaseModel):
@@ -300,6 +301,7 @@ def filter_and_rank_credit_schemes(
             interest_rate_beneficiary=_get_interest_rate_beneficiary(scheme),
             max_loan_amount=scheme.get("max_loan_amount"),
             match_reason=_build_match_reason(scheme, estimated_cost, income_level, project_type),
+            channel_partners=scheme.get("channel_partners", []),  # Forward real types to Module 3
         ))
 
     return CreditRecommendationResult(

@@ -7,7 +7,7 @@ import type { QAResult } from "@/lib/types";
 
 interface Message {
   id: string;
-  sender: "user" | "assistant";
+  sender: "user" | "assistant" | "redirect";
   text: string;
   source?: string;
   verified?: boolean;
@@ -27,6 +27,22 @@ export default function QAPage() {
     },
   ]);
 
+  // Intake-intent detection — these patterns signal a new scheme-search request,
+  // NOT a Q&A question. They must route to Module 1 (the form-based recommender),
+  // never to Module 4 RAG. Architecture boundary enforced here at the UI layer.
+  const isIntakeRequest = (text: string): boolean => {
+    const lower = text.toLowerCase();
+    const intakePatterns = [
+      "find scheme", "find relevant", "find the relevant", "find me scheme",
+      "recommend me", "recommend scheme", "which scheme", "what scheme",
+      "eligible for", "apply for me", "find loan", "suggest scheme",
+      "i am a ", "i'm a ", "im a ", "i am an ", "i'm an ", "im an ",
+      "suitable scheme", "right scheme", "appropriate scheme",
+      "मुझे योजना", "कौन सी योजना", "योजना बताओ",
+    ];
+    return intakePatterns.some((p) => lower.includes(p));
+  };
+
   const sampleQuestions = [
     "What documents do I need for a Term Loan?",
     "What is the maximum income limit to be eligible?",
@@ -34,9 +50,6 @@ export default function QAPage() {
     "What is the interest rate for women beneficiaries?",
   ];
 
-  // Calls the real backend RAG Q&A endpoint (POST /api/v1/qa).
-  // Structured questions are answered from scheme records with zero LLM calls;
-  // narrative questions use retrieval + generation. Never a mock response.
   const handleSend = async (text: string) => {
     if (!text.trim() || isThinking) return;
 
@@ -48,6 +61,19 @@ export default function QAPage() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputMessage("");
+
+    // Detect intake-intent before hitting the QA API.
+    // "find relevant schemes for me" is a Module 1 request, not a Q&A question.
+    if (isIntakeRequest(text)) {
+      const redirectMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "redirect",
+        text: "It looks like you want scheme recommendations based on your profile. The AI Assistant answers questions about specific schemes — to find which schemes you qualify for, use the scheme finder form.",
+      };
+      setMessages((prev) => [...prev, redirectMsg]);
+      return;
+    }
+
     setIsThinking(true);
 
     try {
@@ -130,7 +156,33 @@ export default function QAPage() {
           
           {/* Chat Messages Scroll Area */}
           <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
-            {messages.map((m) => (
+            {messages.map((m) => {
+              // Redirect card — shown when user types an intake-style message
+              if (m.sender === "redirect") {
+                return (
+                  <div key={m.id} className="flex justify-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#FEF3C7] text-[#92400E] flex items-center justify-center shrink-0 mt-0.5">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                    </div>
+                    <div className="max-w-xl bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl rounded-bl-none p-4 shadow-xs">
+                      <p className="text-sm text-[#78350F] leading-relaxed">{m.text}</p>
+                      <Link
+                        href="/intake"
+                        className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#16A34A] hover:bg-[#15803D] text-white text-xs font-bold transition-colors"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Find My Scheme →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
               <div
                 key={m.id}
                 className={`flex gap-3 ${m.sender === "user" ? "justify-end" : "justify-start"}`}
@@ -162,7 +214,8 @@ export default function QAPage() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Suggested Questions Pills */}
